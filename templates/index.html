@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url('https://media.istockphoto.com/id/1135638647/photo/white-lines-and-spheres.webp?b=1&s=170667a&w=0&k=20&c=KlFMDLyLj_V_AbGjSXaUxcuIb_7NN1s8cBRPYlfZqhw=');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .chat-header {
+            background-color: #7e57c2;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+            width: 100vw;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        .header-buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .header-button {
+            color: #fff;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            margin: 0 5px;
+            background-color: transparent;
+            border: 1px solid #fff;
+            transition: background-color 0.3s ease;
+        }
+        .header-button:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        .chat-container {
+            background-color: transparent;
+            width: 100%;
+            margin: 20px auto;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 600px;
+            border-radius: 10px;
+            padding-top: 60px;
+        }
+        .chat-body {
+            height: calc(60vh - 160px);
+            overflow-y: auto;
+            padding: 10px;
+            width: 100%;
+            margin-top: 80px;
+            margin-bottom: 80px;
+            border-radius: 0;
+            background-color: transparent;
+            flex: 1;
+        }
+        .message {
+            margin-bottom: 10px;
+        }
+        .message-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        .user-message {
+            background-color: #d1c4e9;
+            color: #4527a0;
+            border-radius: 20px;
+            padding: 10px;
+            max-width: 50%;
+            margin-left: auto;
+        }
+        .bot-message {
+            background-color: #b2dfdb;
+            color: #00695c;
+            border-radius: 20px;
+            padding: 10px;
+            max-width: 70%;
+            margin-right: auto;
+        }
+        .chat-footer {
+            background-color: #f5f5f5;
+            padding: 10px;
+            width: 100%;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .chat-footer input[type="text"] {
+            flex-grow: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            outline: none;
+        }
+        .chat-footer button {
+            background-color: #7e57c2;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h2>Chatbot Interface</h2>
+            <div class="header-buttons">
+                <a href="/about" class="header-button">About Us</a>
+                <a href="/" class="header-button">Ask Your Question</a>
+                <a href="https://www.sochara.org/" class="header-button" target="_blank">Donate</a>
+            </div>
+        </div>
+        <div class="chat-body" id="chat-body">
+            <!-- Loop through conversation_history and display messages -->
+            {% for user_msg, bot_msg, filename in conversation_history %}
+                {% if user_msg %}
+                    <div class="message user-message">{{ user_msg }}</div>
+                {% endif %}
+                {% if bot_msg %}
+                    <div class="message bot-message">{{ bot_msg }}</div>
+                {% endif %}
+                {% if filename %}
+                    <div class="message filename">{{ filename }}</div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        <div class="chat-footer">
+            <!-- Form for user input -->
+            <form method="post" id="chat-form">
+                <input type="text" id="query" name="query" placeholder="Type your message..." required>
+                <button type="submit" id="send-btn">Send</button>
+            </form>
+        </div>
+    </div>
+    <!-- JavaScript for scrolling to the bottom of the chat body -->
+    <script>
+        var chatBody = document.getElementById('chat-body');
+        chatBody.scrollTop = chatBody.scrollHeight; // Scroll to the bottom of the chat body
+
+        // Submit form on button click
+        document.getElementById("send-btn").addEventListener("click", function() {
+            document.getElementById("chat-form").submit();
+        });
+    </script>
+</body>
+</html>
