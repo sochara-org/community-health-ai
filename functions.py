@@ -14,14 +14,18 @@ from dotenv import load_dotenv
 
 print("Current Working Directory:", os.getcwd())
 
-dotenv_path = 'api.env' 
+if 'OPENAI_API_KEY' in os.environ:
+    del os.environ['OPENAI_API_KEY']
+
+dotenv_path = 'a.env' 
 
 if not os.path.exists(dotenv_path):
     raise FileNotFoundError(f"The .env file at path '{dotenv_path}' does not exist.")
-# Load environment variables from .env file
+
+
 load_dotenv(dotenv_path)
 
-# Now you can access the API key as before
+
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
 def initialize_clickhouse_connection():
@@ -38,7 +42,7 @@ def initialize_tokenizer_and_model():
     return tokenizer, model
 
 def initialize_llama_model():
-    # Update the path to match your local Llama model installation
+
     llama_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-hf")
     llama_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-hf")
     return llama_tokenizer, llama_model
@@ -111,7 +115,7 @@ def rank_sections(client, question_embedding, question_tokens):
         print("An error occurred while ranking sections:", e)
         return None
     
-def vector_search_in_chunks(client, question_embedding):
+def cosine_similarity(client, question_embedding):
     try:
         question_embedding_str = ','.join(map(str, question_embedding))
         query = f"""
@@ -126,58 +130,79 @@ def vector_search_in_chunks(client, question_embedding):
         sections = client.execute(query)
         if not sections:
             print("No sections retrieved from the database.")
-            return None
-        return sections[0]  # Returning only the necessary parts (text and filename)
+            return None, None
+        chunk_text, original_filename = sections[0][:2]
+        return chunk_text, original_filename
     except Exception as e:
         print("An error occurred during vector search in chunks:", e)
-        return None
-    
-def vector_search_in_chunks_anb(client, query_text, question_embedding):
+        return None, None
+
+def vector_search_cosine_distance(client, question_embedding):
     try:
         question_embedding_str = ','.join(map(str, question_embedding))
         query = f"""
-        SELECT chunk_text, embeddings, original_filename,
-               (dotProduct(embeddings, [{question_embedding_str}]) / 
-                (sqrt(dotProduct(embeddings, embeddings)) * sqrt(dotProduct([{question_embedding_str}], [{question_embedding_str}]))) ) AS cosine_similarity
+        SELECT chunk_text, original_filename,
+               1 - (dotProduct(embeddings, [{question_embedding_str}]) / 
+                    (sqrt(dotProduct(embeddings, embeddings)) * sqrt(dotProduct([{question_embedding_str}], [{question_embedding_str}])))
+               ) AS cosine_distance
         FROM b_chunks
         JOIN b_table ON b_chunks.summary_id = b_table.id
-        ORDER BY cosine_similarity DESC
-        LIMIT 10  -- Fetch more chunks to ensure we get neighbors
+        ORDER BY cosine_distance ASC
+        LIMIT 1
         """
-
         sections = client.execute(query)
         if not sections:
             print("No sections retrieved from the database.")
-            return None
-
-        # Find the top chunk and its neighbors
-        top_chunk_index = 0
-        closest_chunk = sections[top_chunk_index]
-
-        # Retrieve the chunk above and below if they exist
-        above_chunk = sections[top_chunk_index - 1] if top_chunk_index > 0 else None
-        below_chunk = sections[top_chunk_index + 1] if top_chunk_index < len(sections) - 1 else None
-
-        # Combine the chunks into one
-        combined_chunk_text = ""
-        if above_chunk:
-            above_chunk_text, _, _, _ = above_chunk
-            combined_chunk_text += above_chunk_text + " "
-        combined_chunk_text += closest_chunk[0]  # Adding the closest chunk
-        if below_chunk:
-            below_chunk_text, _, _, _ = below_chunk
-            combined_chunk_text += " " + below_chunk_text
-
-        # Structure the combined chunk
-        structured_combined_chunk = structure_chunk_text(query_text, combined_chunk_text)
-
-        return structured_combined_chunk
-
+            return None, None
+        chunk_text, original_filename = sections[0][:2]
+        return chunk_text, original_filename
     except Exception as e:
         print("An error occurred during vector search in chunks:", e)
-        return None
+        return None, None
 
+def ann_search(client, query_embedding):
+    try:
+        query_embedding_str = ','.join(map(str, query_embedding))
+        query = f"""
+        SELECT chunk_text, original_filename,
+               1 - (dotProduct(embeddings, [{query_embedding_str}]) / 
+                    (sqrt(dotProduct(embeddings, embeddings)) * sqrt(dotProduct([{query_embedding_str}], [{query_embedding_str}])))
+               ) AS distance
+        FROM b_chunks
+        JOIN b_table ON b_chunks.summary_id = b_table.id
+        ORDER BY distance ASC
+        LIMIT 1
+        """
+        sections = client.execute(query)
+        if not sections:
+            print("No sections retrieved from the database.")
+            return None, None
+        chunk_text, original_filename = sections[0][:2]
+        return chunk_text, original_filename
+    except Exception as e:
+        print("An error occurred during vector search in chunks:", e)
+        return None, None
 
+def euclidean_search(client, question_embedding):
+    try:
+        question_embedding_str = ','.join(map(str, question_embedding))
+        query = f"""
+        SELECT chunk_text, original_filename,
+               LpDistance(embeddings, [{question_embedding_str}], 2) AS euclidean_distance
+        FROM b_chunks
+        JOIN b_table ON b_chunks.summary_id = b_table.id
+        ORDER BY euclidean_distance ASC
+        LIMIT 1
+        """
+        sections = client.execute(query)
+        if not sections:
+            print("No sections retrieved from the database.")
+            return None, None
+        chunk_text, original_filename = sections[0][:2]
+        return chunk_text, original_filename
+    except Exception as e:
+        print("An error occurred during vector search in chunks:", e)
+        return None, None
 
 
 def structure_sentence_with_llama(query, chunk_text, llama_tokenizer, llama_model):
@@ -248,15 +273,27 @@ def process_query(query_text):
             return structured_sentence, pdf_filename
     return None, None
 
-def process_query_clickhouse(query_text):
-    #tokenizer, model = initialize_tokenizer_and_model()
+def process_query_clickhouse(query_text, search_method='euclidean_search'):
     tokenizer, model = initialize_tokenizer_and_model()
     client = initialize_clickhouse_connection()
     question_embedding = generate_embeddings(tokenizer, model, query_text)
+    
     if question_embedding is not None:
-        closest_chunk = vector_search_in_chunks(client, question_embedding)
-        if closest_chunk:
-            chunk_text, pdf_filename, _ = closest_chunk
-            structured_sentence = structure_chunk_text(query_text,chunk_text)
-            return structured_sentence, pdf_filename
+
+        search_methods = {
+            'cosine_similarity': cosine_similarity,
+            'vector_search_cosine_distance': vector_search_cosine_distance,
+            'ann_search': ann_search,
+            'euclidean_search': euclidean_search
+        }
+        
+        if search_method in search_methods:
+            search_function = search_methods[search_method]
+            chunk_text, pdf_filename = search_function(client, question_embedding)
+            if chunk_text and pdf_filename:
+                structured_sentence = structure_chunk_text(query_text, chunk_text)
+                return structured_sentence, pdf_filename
+        else:
+            print(f"Search method '{search_method}' is not valid.")
     return None, None
+
