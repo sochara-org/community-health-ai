@@ -36,9 +36,10 @@ def initialize_clickhouse_connection():
                   database=os.getenv('CLICKHOUSE_DATABASE'))
 
 def initialize_tokenizer_and_model():
-    tokenizer = AutoTokenizer.from_pretrained("gpt2")
-    model = AutoModel.from_pretrained("gpt2")
-    tokenizer.add_special_tokens({'pad_token': tokenizer.eos_token})
+    tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
+    model = AutoModel.from_pretrained("bert-base-uncased")
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token or "[PAD]"
     return tokenizer, model
 
 def initialize_llama_model():
@@ -160,28 +161,42 @@ def vector_search_cosine_distance(client, question_embedding):
         print("An error occurred during vector search in chunks:", e)
         return None, None
 
-def ann_search(client, query_embedding):
+def ann_search(client, query_embedding, window_size=2):
     try:
         query_embedding_str = ','.join(map(str, query_embedding))
         query = f"""
-        SELECT chunk_text, original_filename,
-               1 - (dotProduct(embeddings, [{query_embedding_str}]) / 
-                    (sqrt(dotProduct(embeddings, embeddings)) * sqrt(dotProduct([{query_embedding_str}], [{query_embedding_str}])))
-               ) AS distance
-        FROM b_chunks
-        JOIN b_table ON b_chunks.summary_id = b_table.id
-        ORDER BY distance ASC
+        SELECT id, chunk_text, original_filename, summary_id, embeddings,
+               (dotProduct(embeddings, [{query_embedding_str}]) /
+               (sqrt(dotProduct(embeddings, embeddings)) * sqrt(dotProduct([{query_embedding_str}], [{query_embedding_str}])))
+               ) AS cosine_similarity
+        FROM abc_chunks
+        JOIN abc_table ON abc_chunks.summary_id = abc_table.id
+        ORDER BY cosine_similarity DESC
         LIMIT 1
         """
         sections = client.execute(query)
         if not sections:
             print("No sections retrieved from the database.")
             return None, None
-        chunk_text, original_filename = sections[0][:2]
-        return chunk_text, original_filename
+        
+        id, chunk_text, original_filename, summary_id, embeddings, cosine_similarity = sections[0]
+
+        # Retrieve surrounding chunks based on the nearest chunk's id
+        surrounding_chunks_query = f"""
+        SELECT chunk_text
+        FROM abc_chunks
+        WHERE summary_id = '{summary_id}' AND
+              id >= {id - window_size} AND
+              id <= {id + window_size}
+        ORDER BY id
+        """
+        surrounding_chunks = client.execute(surrounding_chunks_query)
+        full_context = ' '.join([chunk[0] for chunk in surrounding_chunks])
+        return full_context, original_filename
     except Exception as e:
         print("An error occurred during vector search in chunks:", e)
         return None, None
+
 
 def euclidean_search(client, question_embedding):
     try:
@@ -273,7 +288,7 @@ def process_query(query_text):
             return structured_sentence, pdf_filename
     return None, None
 
-def process_query_clickhouse(query_text, search_method='euclidean_search'):
+def process_query_clickhouse(query_text, search_method='ann_search'):
     tokenizer, model = initialize_tokenizer_and_model()
     client = initialize_clickhouse_connection()
     question_embedding = generate_embeddings(tokenizer, model, query_text)
@@ -291,9 +306,9 @@ def process_query_clickhouse(query_text, search_method='euclidean_search'):
             search_function = search_methods[search_method]
             chunk_text, pdf_filename = search_function(client, question_embedding)
             if chunk_text and pdf_filename:
-                structured_sentence = structure_chunk_text(query_text, chunk_text)
-                return structured_sentence, pdf_filename
+                return chunk_text, pdf_filename
         else:
             print(f"Search method '{search_method}' is not valid.")
     return None, None
+
 
