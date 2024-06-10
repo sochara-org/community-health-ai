@@ -78,6 +78,7 @@ process_query_clickhouse: Processes a query using different search methods and r
 process_query_clickhouse_word: Processes a query by extracting important words and retrieving surrounding context.
 
 
+
 search_query.py:
 index: Renders the home page and processes user queries.
 about: Renders the about page.
