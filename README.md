@@ -5,9 +5,9 @@ This project implements a query processing and vector search application using v
 - Connection to a ClickHouse database
 - Initialization of various tokenizers and models
 - Generation of embeddings for input queries
-- Ranking of database sections based on cosine similarity and Jaccard similarity
+- Ranking of database sections based on cosine similarity
 - Retrieval of database sections using different search methods (cosine distance, Euclidean distance, etc.)
-- Structuring of text using language models (OpenAI GPT-3.5 and LLaMA-2)
+- Structuring of text using language model OpenAI GPT-3.5 
 
 ## Installation
 
@@ -45,33 +45,38 @@ About Page: Information about the project.
 
 Key Functions:
 functions.py
-initialize_clickhouse_connection: Establishes a connection to the ClickHouse database.
+initialize_clickhouse_connection: Establishes a ClickHouse database connection.
 
-initialize_tokenizer_and_model: Initializes a tokenizer and model (e.g., GPT-2).
+initialize_tokenizer_and_model: Initializes a tokenizer and model for generating embeddings.
 
-initialize_llama_model: Initializes the LLaMA-2 model.
+generate_embeddings: Generates embeddings for a given query text.
 
-generate_embeddings: Generates embeddings for a given query.
+rank_sections: Ranks text sections based on cosine similarity to the query.
 
-rank_sections: Ranks sections from the database based on cosine and Jaccard similarity.
+cosine_similarity: Retrieves the most similar section using cosine similarity.
 
-cosine_similarity: Retrieves the most similar section based on cosine similarity
-.
-vector_search_cosine_distance: Retrieves the most similar section based on cosine distance.
+vector_search_cosine_distance: Retrieves the most similar section using cosine distance.
 
 ann_search: Retrieves the most similar section using approximate nearest neighbors search.
 
-euclidean_search: Retrieves the most similar section based on Euclidean distance.
+euclidean_search: Retrieves the most similar section using Euclidean distance.
 
-structure_sentence_with_llama: Structures text using the LLaMA-2 model.
+extract_important_words: Extracts important words from the query text.
 
-structure_sentence: Structures text using OpenAI's GPT-3.5 model.
+ann_search_on_chunks: Performs approximate nearest neighbors search on chunks containing important words.
 
-structure_chunk_text: Structures text without adding any changes.
+get_surrounding_chunks: Retrieves surrounding chunks for additional context.
+
+structure_sentence: Structures text using the GPT-3.5 model.
+
+structure_chunk_text: Formats text without adding or removing content.
 
 process_query: Processes a query and returns a structured response.
 
 process_query_clickhouse: Processes a query using different search methods and returns a structured response.
+
+process_query_clickhouse_word: Processes a query by extracting important words and retrieving surrounding context.
+
 
 
 search_query.py:
