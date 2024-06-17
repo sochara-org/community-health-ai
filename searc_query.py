@@ -15,7 +15,7 @@ def index():
     structured_sentence = None
     if request.method == 'POST':
         query_text = request.form['query']
-        structured_sentence, pdf_filename = functions.process_query_clickhouse(query_text)
+        structured_sentence, pdf_filename = functions.process_query_clickhouse_word(query_text)
         conversation_history.append((query_text, structured_sentence, pdf_filename))
     return render_template('index.html', conversation_history=conversation_history)
 
