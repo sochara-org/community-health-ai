@@ -16,7 +16,6 @@
             display: flex;
             flex-direction: column;
             height: 100vh;
-            display: flex;
             justify-content: center;
             align-items: center;
         }
@@ -139,15 +138,17 @@
         </div>
         <div class="chat-body" id="chat-body">
             <!-- Loop through conversation_history and display messages -->
-            {% for user_msg, bot_msg, filename in conversation_history %}
+            {% for user_msg, bot_msg, pdf_url in conversation_history %}
                 {% if user_msg %}
                     <div class="message user-message">{{ user_msg }}</div>
                 {% endif %}
                 {% if bot_msg %}
                     <div class="message bot-message">{{ bot_msg }}</div>
                 {% endif %}
-                {% if filename %}
-                    <div class="message filename">{{ filename }}</div>
+                {% if pdf_url %}
+                    <div class="message filename">
+                        <a href="{{ pdf_url }}" target="_blank">{{ pdf_url }}</a>
+                    </div>
                 {% endif %}
             {% endfor %}
         </div>
