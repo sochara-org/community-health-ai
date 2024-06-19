@@ -151,30 +151,32 @@ def vector_search_cosine_distance(client, question_embedding):
         print("An error occurred during vector search in chunks:", e)
         return None, None
 
-def ann_search(client, query_embedding, window_size=2):
+def ann_search(client, query_embedding, window_size=2, top_n=5):
     try:
         question_embedding_str = ','.join(map(str, query_embedding))
         query = f"""
-        SELECT id, chunk_text, summary_id, embeddings,
-               (dotProduct(embeddings, [{question_embedding_str}]) /
-               (sqrt(dotProduct(embeddings, embeddings)) * sqrt(dotProduct([{question_embedding_str}], [{question_embedding_str}])))
+        SELECT c.id, c.chunk_text, c.summary_id,
+               (dotProduct(c.embeddings, [{question_embedding_str}]) /
+               (sqrt(dotProduct(c.embeddings, c.embeddings)) * sqrt(dotProduct([{question_embedding_str}], [{question_embedding_str}])))
                ) AS cosine_similarity
-        FROM abc_chunks
-        JOIN abc_table ON abc_chunks.summary_id = abc_table.id
+        FROM abc_chunks AS c
+        JOIN abc_table AS a ON c.summary_id = a.id
         ORDER BY cosine_similarity DESC
-        LIMIT 1
+        LIMIT {top_n}
         """
         sections = client.execute(query)
         if not sections:
             print("No sections retrieved from the database.")
             return None, None
-        
-        id, chunk_text, summary_id, embeddings, cosine_similarity = sections[0]
 
-        # Retrieve surrounding chunks based on the nearest chunk's id
-        full_context = get_surrounding_chunks(client, id, summary_id, window_size)
-        original_filename = get_original_filename(client, summary_id)
-        return full_context, original_filename
+        chunks = []
+        for section in sections:
+            id, chunk_text, summary_id, cosine_similarity = section
+            full_context = get_surrounding_chunks(client, id, summary_id, window_size)
+            file_url = get_original_filename(client, summary_id)
+            chunks.append((full_context, file_url))
+
+        return chunks
     except Exception as e:
         print("An error occurred during vector search in chunks:", e)
         return None, None
@@ -204,9 +206,7 @@ def euclidean_search(client, question_embedding):
         return None, None
 
 
-def query_clickhouse_word_with_multi_stage(client, important_words, query_embedding):
-
-    tokenizer, model = initialize_tokenizer_and_model()
+def query_clickhouse_word_with_multi_stage(client, important_words, query_embedding, top_n=5):
     query_embedding_str = ','.join(map(str, query_embedding))
 
     # Stage 1: Retrieve potentially relevant chunks based on keyword matching
@@ -221,23 +221,30 @@ def query_clickhouse_word_with_multi_stage(client, important_words, query_embedd
     if matched_chunks:
         # Stage 2: Rank or re-rank the matched chunks using semantic similarity
         ranked_chunks_query = f"""
-        SELECT c.id, c.chunk_text, c.summary_id, c.embeddings,
+        SELECT c.id, c.chunk_text, c.summary_id,
                (dotProduct(c.embeddings, [{query_embedding_str}]) /
                 (sqrt(dotProduct(c.embeddings, c.embeddings)) * sqrt(dotProduct([{query_embedding_str}], [{query_embedding_str}]))))
                AS cosine_similarity
         FROM (
         {keyword_matching_query}
         ) AS c
+        JOIN abc_table AS a ON c.summary_id = a.id
         ORDER BY cosine_similarity DESC
-        LIMIT 1
+        LIMIT {top_n}
         """
         ranked_chunks = client.execute(ranked_chunks_query)
 
         if ranked_chunks:
-            id, chunk_text, summary_id, embeddings, cosine_similarity = ranked_chunks[0]
-            full_context = get_surrounding_chunks(client, id, summary_id)
-            original_filename = get_original_filename(client, summary_id)
-            return full_context, original_filename
+            chunks = []
+            for chunk in ranked_chunks:
+                id, chunk_text, summary_id, cosine_similarity = chunk
+                full_context = get_surrounding_chunks(client, id, summary_id)
+                file_url = get_original_filename(client, summary_id)
+                chunks.append((full_context, file_url))
+            return chunks
+
+    return ann_search(client, query_embedding, top_n=top_n)
+
 
  
     return ann_search(client, query_embedding)
@@ -335,3 +342,25 @@ def process_query_clickhouse_word(query_text):
 
     print("No relevant chunk found. Performing ann_search as fallback.")
     return ann_search(client, query_embedding)
+
+def process_query_clickhouse_pdf(query_text, top_n=5):
+    tokenizer, model = initialize_tokenizer_and_model()
+    client = initialize_clickhouse_connection()
+    important_words = extract_important_words(query_text)
+
+    if important_words:
+        query_embedding = generate_embeddings(tokenizer, model, query_text)
+        closest_chunks = query_clickhouse_word_with_multi_stage(client, important_words, query_embedding, top_n)
+        if closest_chunks:
+            full_contexts = [chunk[0] for chunk in closest_chunks]
+            pdf_filenames = [chunk[1] for chunk in closest_chunks]
+            return full_contexts, pdf_filenames
+
+    print("No relevant chunk found. Performing ann_search as fallback.")
+    chunks = ann_search(client, query_embedding, top_n=top_n)
+    if chunks:
+        full_contexts = [chunk[0] for chunk in chunks]
+        pdf_filenames = [chunk[1] for chunk in chunks]
+        return full_contexts, pdf_filenames
+
+    return None, []
