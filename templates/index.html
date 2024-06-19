@@ -98,6 +98,9 @@
             max-width: 70%;
             margin-right: auto;
         }
+        .filename {
+            margin-top: 5px;
+        }
         .chat-footer {
             background-color: #f5f5f5;
             padding: 10px;
@@ -124,6 +127,31 @@
             border-radius: 20px;
             cursor: pointer;
         }
+        .loading {
+            display: none;
+            font-size: 18px;
+            color: #7e57c2;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #7e57c2;
+            animation: spin 1s ease infinite;
+        }
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
 <body>
@@ -138,36 +166,91 @@
         </div>
         <div class="chat-body" id="chat-body">
             <!-- Loop through conversation_history and display messages -->
-            {% for user_msg, bot_msg, pdf_url in conversation_history %}
+            {% for user_msg, bot_msg, pdf_urls in conversation_history %}
                 {% if user_msg %}
                     <div class="message user-message">{{ user_msg }}</div>
                 {% endif %}
                 {% if bot_msg %}
                     <div class="message bot-message">{{ bot_msg }}</div>
                 {% endif %}
-                {% if pdf_url %}
-                    <div class="message filename">
-                        <a href="{{ pdf_url }}" target="_blank">{{ pdf_url }}</a>
-                    </div>
+                {% if pdf_urls %}
+                    {% for pdf_url in pdf_urls %}
+                        <div class="message filename">
+                            <a href="{{ pdf_url }}" target="_blank">{{ pdf_url }}</a>
+                        </div>
+                    {% endfor %}
                 {% endif %}
             {% endfor %}
         </div>
         <div class="chat-footer">
             <!-- Form for user input -->
-            <form method="post" id="chat-form">
+            <form id="chat-form">
                 <input type="text" id="query" name="query" placeholder="Type your message..." required>
                 <button type="submit" id="send-btn">Send</button>
             </form>
         </div>
     </div>
-    <!-- JavaScript for scrolling to the bottom of the chat body -->
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+    </div>
+    <!-- JavaScript for scrolling to the bottom of the chat body and handling form submission -->
     <script>
         var chatBody = document.getElementById('chat-body');
         chatBody.scrollTop = chatBody.scrollHeight; // Scroll to the bottom of the chat body
 
-        // Submit form on button click
-        document.getElementById("send-btn").addEventListener("click", function() {
-            document.getElementById("chat-form").submit();
+        document.getElementById("chat-form").addEventListener("submit", function(event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            var query = document.getElementById("query").value;
+            var loading = document.getElementById("loading");
+
+            // Show loading animation
+            loading.style.display = "block";
+
+            // Send the AJAX request
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    loading.style.display = "none"; // Hide loading animation
+
+                    if (xhr.status === 200) {
+                        // Parse the response and update the chat body
+                        var response = JSON.parse(xhr.responseText);
+                        var userMessage = document.createElement("div");
+                        userMessage.className = "message user-message";
+                        userMessage.textContent = query;
+                        chatBody.appendChild(userMessage);
+
+                        var botMessage = document.createElement("div");
+                        botMessage.className = "message bot-message";
+                        botMessage.textContent = response.bot_reply;
+                        chatBody.appendChild(botMessage);
+
+                        if (response.pdf_urls && response.pdf_urls.length > 0) {
+                            response.pdf_urls.forEach(function(pdf_url) {
+                                var pdfLink = document.createElement("div");
+                                pdfLink.className = "message filename";
+                                var link = document.createElement("a");
+                                link.href = pdf_url;
+                                link.target = "_blank";
+                                link.textContent = pdf_url;
+                                pdfLink.appendChild(link);
+                                chatBody.appendChild(pdfLink);
+                            });
+                        }
+
+                        chatBody.scrollTop = chatBody.scrollHeight; // Scroll to the bottom of the chat body
+                    } else {
+                        console.error("Error: " + xhr.status);
+                    }
+                }
+            };
+
+            xhr.send("query=" + encodeURIComponent(query));
+            document.getElementById("query").value = ""; // Clear the input field
         });
     </script>
 </body>
