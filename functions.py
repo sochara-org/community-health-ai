@@ -9,6 +9,11 @@ from clickhouse_driver import Client
 from scipy.spatial.distance import cosine
 from dotenv import load_dotenv
 from stop_words import stop_words
+import logging
+
+
+logger = logging.getLogger(__name__)
+
 
 load_dotenv()
 archive_base_url = os.getenv('ARCHIVE_BASE_URL')
@@ -155,6 +160,7 @@ def ann_search(client, query_embedding, window_size=2, top_n=5):
     try:
         question_embedding_str = ','.join(map(str, query_embedding))
         query = f"""
+
         SELECT c.id, c.chunk_text, c.summary_id,
                (dotProduct(c.embeddings, [{question_embedding_str}]) /
                (sqrt(dotProduct(c.embeddings, c.embeddings)) * sqrt(dotProduct([{question_embedding_str}], [{question_embedding_str}])))
@@ -170,17 +176,26 @@ def ann_search(client, query_embedding, window_size=2, top_n=5):
             return None, None
 
         chunks = []
+        pdf_filenames = []  # Collect PDF filenames for description retrieval
         for section in sections:
             id, chunk_text, summary_id, cosine_similarity = section
             full_context = get_surrounding_chunks(client, id, summary_id, window_size)
             file_url = get_original_filename(client, summary_id)
             chunks.append((full_context, file_url))
+            if file_url and file_url.endswith('.pdf'):
+                pdf_filenames.append(file_url)
 
-        return chunks
+        # Retrieve descriptions for top PDF files
+        pdf_descriptions = []
+        for filename in pdf_filenames[:top_n]:
+            description = get_pdf_description(filename)
+            pdf_descriptions.append(description)
+
+        return chunks, pdf_descriptions
+
     except Exception as e:
         print("An error occurred during vector search in chunks:", e)
         return None, None
-
 
 
 def euclidean_search(client, question_embedding):
@@ -204,7 +219,7 @@ def euclidean_search(client, question_embedding):
     except Exception as e:
         print("An error occurred during vector search in chunks:", e)
         return None, None
-
+    
 
 def query_clickhouse_word_with_multi_stage(client, important_words, query_embedding, top_n=5):
     query_embedding_str = ','.join(map(str, query_embedding))
@@ -236,18 +251,83 @@ def query_clickhouse_word_with_multi_stage(client, important_words, query_embedd
 
         if ranked_chunks:
             chunks = []
+            pdf_filenames = []  # Collect PDF filenames for description retrieval
             for chunk in ranked_chunks:
                 id, chunk_text, summary_id, cosine_similarity = chunk
                 full_context = get_surrounding_chunks(client, id, summary_id)
                 file_url = get_original_filename(client, summary_id)
                 chunks.append((full_context, file_url))
-            return chunks
+                if file_url and file_url.endswith('.pdf'):
+                    pdf_filenames.append(file_url)
 
+            # Retrieve descriptions for top PDF files
+            pdf_descriptions = []
+            for filename in pdf_filenames[:top_n]:
+                description = get_pdf_description(filename)
+                pdf_descriptions.append(description)
+
+            return chunks, pdf_descriptions
+
+    # Fallback to ANN search if no relevant chunks found
     return ann_search(client, query_embedding, top_n=top_n)
-
-
  
-    return ann_search(client, query_embedding)
+
+def get_pdf_description(filename):
+    try:
+        client = initialize_clickhouse_connection()
+        filename = os.path.basename(filename)
+        if not filename.endswith(".pdf"):
+            filename += ".pdf"
+        filename = filename.replace("None", "")
+
+        query = f"SELECT id FROM abc_table WHERE original_filename = '{filename}'"
+        result = client.execute(query)
+
+        if result:
+            summary_id = str(result[0][0])
+            summary_id = summary_id.replace("'", "''")
+
+            query_chunks = f"""
+                SELECT chunk_text
+                FROM abc_chunks
+                WHERE summary_id = '{summary_id}'
+                ORDER BY id ASC
+                LIMIT 1
+            """
+            chunks_result = client.execute(query_chunks)
+            
+            if chunks_result:
+               full_description = chunks_result[0][0]
+            # Truncate the description to 300 characters and add ellipsis if needed
+               description = (full_description[:247] + '...') if len(full_description) > 250 else full_description
+               return description
+            else:
+                return "Description not found."
+        else:
+            return "File not found."
+
+    except Exception as e:
+        logger.error(f"Error querying ClickHouse: {e}")
+        return "Error retrieving description."
+
+
+def deduplicate_results(closest_chunks, top_n):
+    full_contexts = []
+    pdf_filenames = []
+    seen_filenames = set()
+
+    for chunk in closest_chunks:
+        if len(chunk) >= 2:
+            full_context, file_url = chunk
+            if file_url not in seen_filenames:
+                full_contexts.append(full_context)
+                pdf_filenames.append(file_url)
+                seen_filenames.add(file_url)
+
+            if len(seen_filenames) == top_n:
+                break  # Stop after getting top_n unique filenames
+
+    return full_contexts, pdf_filenames
 
 def structure_sentence_with_llama(query, chunk_text, llama_tokenizer, llama_model):
     try:
@@ -259,6 +339,7 @@ def structure_sentence_with_llama(query, chunk_text, llama_tokenizer, llama_mode
     except Exception as e:
         print(f"An error occurred: {e}")
         return None
+    
 
 def structure_sentence(query, chunk_text):
     try:
@@ -328,39 +409,44 @@ def process_query_clickhouse(query_text, search_method='ann_search'):
             print(f"Search method '{search_method}' is not valid.")
     return None, None
 
-def process_query_clickhouse_word(query_text):
-    tokenizer, model = initialize_tokenizer_and_model()
-    client = initialize_clickhouse_connection()
-    important_words = extract_important_words(query_text)
+# Add debug prints and exception handling
 
-    if important_words:
-        query_embedding = generate_embeddings(tokenizer, model, query_text)
-        closest_chunks = query_clickhouse_word_with_multi_stage(client, important_words, query_embedding)
-        if closest_chunks:
-            full_context, original_filename = closest_chunks
-            return full_context, original_filename
-
-    print("No relevant chunk found. Performing ann_search as fallback.")
-    return ann_search(client, query_embedding)
 
 def process_query_clickhouse_pdf(query_text, top_n=5):
-    tokenizer, model = initialize_tokenizer_and_model()
-    client = initialize_clickhouse_connection()
-    important_words = extract_important_words(query_text)
+    try:
+        # Initialize tokenizer, model, and ClickHouse client
+        tokenizer, model = initialize_tokenizer_and_model()
+        client = initialize_clickhouse_connection()
 
-    if important_words:
-        query_embedding = generate_embeddings(tokenizer, model, query_text)
-        closest_chunks = query_clickhouse_word_with_multi_stage(client, important_words, query_embedding, top_n)
-        if closest_chunks:
-            full_contexts = [chunk[0] for chunk in closest_chunks]
-            pdf_filenames = [chunk[1] for chunk in closest_chunks]
-            return full_contexts, pdf_filenames
+        # Extract important words from the query text
+        important_words = extract_important_words(query_text)
 
-    print("No relevant chunk found. Performing ann_search as fallback.")
-    chunks = ann_search(client, query_embedding, top_n=top_n)
-    if chunks:
-        full_contexts = [chunk[0] for chunk in chunks]
-        pdf_filenames = [chunk[1] for chunk in chunks]
-        return full_contexts, pdf_filenames
+        if important_words:
+            # Generate query embeddings from the query text
+            query_embedding = generate_embeddings(tokenizer, model, query_text)
+            # Perform multi-stage query to find closest chunks
+            closest_chunks, _ = query_clickhouse_word_with_multi_stage(client, important_words, query_embedding, top_n)
+            
+            if closest_chunks:
+                # Deduplicate the results
+                full_contexts, pdf_filenames = deduplicate_results(closest_chunks, top_n)
 
-    return None, []
+                # Retrieve descriptions for unique PDF files
+                pdf_descriptions = []
+                for filename in pdf_filenames:
+                    description = get_pdf_description(filename)
+                    pdf_descriptions.append(description)
+
+                return full_contexts, pdf_filenames, pdf_descriptions
+            else:
+                # Handle case where no closest_chunks were found
+                print("No closest_chunks found")
+                return None, [], []  # Return empty lists for all results
+
+        # Handle case where no important words were extracted
+        return None, [], []
+
+    except Exception as e:
+        # Log the error using the logger
+        logger.error(f"Error in process_query_clickhouse_pdf: {str(e)}")
+        return None, [], []  # Return default values or handle as needed
