@@ -166,17 +166,14 @@
         </div>
         <div class="chat-body" id="chat-body">
             <!-- Loop through conversation_history and display messages -->
-            {% for user_msg, bot_msg, pdf_urls in conversation_history %}
-                {% if user_msg %}
-                    <div class="message user-message">{{ user_msg }}</div>
-                {% endif %}
-                {% if bot_msg %}
-                    <div class="message bot-message">{{ bot_msg }}</div>
-                {% endif %}
-                {% if pdf_urls %}
-                    {% for pdf_url in pdf_urls %}
+            {% for entry in conversation_history %}
+                <div class="message user-message">{{ entry[0] }}</div>  <!-- Access the query_text -->
+                <div class="message bot-message">{{ entry[1] }}</div>
+                {% if entry[2] and entry[3] %}
+                    {% for pdf_url, pdf_description in zip(entry[2], entry[3]) %}
                         <div class="message filename">
                             <a href="{{ pdf_url }}" target="_blank">{{ pdf_url }}</a>
+                            <p>Description: {{ pdf_description }}</p>
                         </div>
                     {% endfor %}
                 {% endif %}
@@ -199,7 +196,7 @@
         chatBody.scrollTop = chatBody.scrollHeight; // Scroll to the bottom of the chat body
 
         document.getElementById("chat-form").addEventListener("submit", function(event) {
-            event.preventDefault(); // Prevent the default form submission
+            event.preventDefault();// Prevent the default form submission
 
             var query = document.getElementById("query").value;
             var loading = document.getElementById("loading");
@@ -207,14 +204,13 @@
             // Show loading animation
             loading.style.display = "block";
 
-            // Send the AJAX request
             var xhr = new XMLHttpRequest();
             xhr.open("POST", "/", true);
             xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4) {
-                    loading.style.display = "none"; // Hide loading animation
+                    loading.style.display = "none";
 
                     if (xhr.status === 200) {
                         // Parse the response and update the chat body
@@ -230,16 +226,25 @@
                         chatBody.appendChild(botMessage);
 
                         if (response.pdf_urls && response.pdf_urls.length > 0) {
-                            response.pdf_urls.forEach(function(pdf_url) {
-                                var pdfLink = document.createElement("div");
-                                pdfLink.className = "message filename";
+                            response.pdf_urls.forEach(function(pdf_url, index) {
+                                var pdfContainer = document.createElement("div");
+                                pdfContainer.className = "message filename";
+                                
                                 var link = document.createElement("a");
                                 link.href = pdf_url;
                                 link.target = "_blank";
                                 link.textContent = pdf_url;
-                                pdfLink.appendChild(link);
-                                chatBody.appendChild(pdfLink);
+                                pdfContainer.appendChild(link);
+                                
+                                if (response.pdf_descriptions && response.pdf_descriptions[index]) {
+                                    var description = document.createElement("p");
+                                    description.textContent = "Description: " + response.pdf_descriptions[index];
+                                    pdfContainer.appendChild(description);
+                                }
+
+                                chatBody.appendChild(pdfContainer);
                             });
+
                         }
 
                         chatBody.scrollTop = chatBody.scrollHeight; // Scroll to the bottom of the chat body
