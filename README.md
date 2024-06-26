@@ -206,15 +206,19 @@ The HTML structure is divided into several main sections:
 - **python-dotenv**: Loads environment variables from a .env file for configuration management.
 - **nltk**: Natural Language Toolkit for text processing tasks like tokenization.
 - **openai**: Client library for interacting with OpenAI's API, used for GPT-3.5 text generation.
+- **PyPDF2**: Library for reading and extracting text from PDF files.
+- **uuid**: Generates unique identifiers for database entries.
+- **pytesseract**: OCR tool for extracting text from images (used for scanned PDFs).
+- **pdf2image**: Converts PDF pages to images for OCR processing.
 
 
-PDF Insertion
-create_clickhouse_tables: Creates the necessary tables in ClickHouse database if they don't already exist.
- insert_pdf_summary (user_name, original_filename): Inserts a new entry into the 'abc_table' for a PDF summary, returning a unique ID.
-extract_text_from_pdf (pdf_path): Extracts text from a PDF file using OCR (Optical Character Recognition).
- insert_chunks (summary_id, pdf_text): Breaks down the PDF text into chunks, generates embeddings, and inserts them into the 'abc_chunks' table.
-process_pdf_file (pdf_file_path, user_name): Processes a single PDF file, extracting text, creating a summary, and inserting chunks into the database.
-main: The main function that initializes the database tables and processes all PDF files in the specified directory.
+### pdf_uploading.py
+**create_clickhouse_tables()** Sets up necessary tables in ClickHouse.
+**insert_pdf_summary()** Inserts a new entry for a PDF file into the database.
+**extract_text_from_pdf()** Extracts text from PDF files, including OCR for scanned documents.
+**insert_chunks()** Splits PDF text into chunks, generates embeddings, and inserts into the database.
+**process_pdf_file()** Orchestrates the processing of a single PDF file.
+**main()** Processes all PDF files in a specified directory.
 
 
 
