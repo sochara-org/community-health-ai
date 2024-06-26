@@ -277,6 +277,17 @@ This script processes PDF files, extracts text, generates embeddings, and stores
 2. Install dependencies: `pip install -r requirements.txt`
 3. Set up a `.env` file with the following variables:
 
+   CLICKHOUSE_HOST=your_clickhouse_host
+   
+   CLICKHOUSE_PORT=your_clickhouse_port
+   
+   CLICKHOUSE_USER=your_clickhouse_user
+   
+   CLICKHOUSE_PASSWORD=your_clickhouse_password
+   
+   CLICKHOUSE_DATABASE=your_clickhouse_database
+
+
 The script will:
 1. Create necessary ClickHouse tables if they don't exist
 2. Process all PDF files in the specified directory
