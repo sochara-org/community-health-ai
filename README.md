@@ -39,67 +39,64 @@ This project implements a query processing and vector search application using v
 
 By default, the application will be accessible at http://127.0.0.1:5000/.
 
-Flask Application
+##Flask Application
 Home Page: Enter a query to receive a structured response based on the most relevant section from the database.
 About Page: Information about the project.
 
-Key Functions:
-functions.py
-initialize_clickhouse_connection()
+##Key Functions:
+##functions.py
+**initialize_clickhouse_connection()**
 Initializes a connection to the ClickHouse database using the credentials and configurations stored in environment variables.
 
-initialize_tokenizer_and_model()
+**initialize_tokenizer_and_model()**
 Loads a pre-trained BERT tokenizer and model from the Hugging Face library. If the tokenizer lacks a padding token, it assigns a default one.
 
-initialize_llama_model()
+**initialize_llama_model()**
 Loads a pre-trained LLaMA tokenizer and model from the Hugging Face library for causal language modeling tasks.
 
-generate_embeddings(tokenizer, model, query)
+**generate_embeddings(tokenizer, model, query)**
 Generates embeddings for a given query text using the provided tokenizer and model. Returns the pooled embedding vector.
 
-extract_important_words(query_text)
+**extract_important_words(query_text)**
 Extracts important words from a given query text, excluding common stop words. Returns a list of significant words.
 
-get_surrounding_chunks(client, id, summary_id, window_size=2)
+**get_surrounding_chunks(client, id, summary_id, window_size=2)**
 Fetches chunks of text surrounding a specific chunk from the database. The window_size parameter determines how many chunks before and after should be included.
 
-get_original_filename(client, summary_id)
+**get_original_filename(client, summary_id)**
 Retrieves the original filename associated with a given summary ID from the database, processes it, and constructs the full file URL.
 
-cosine_similarity(client, question_embedding)
+**cosine_similarity(client, question_embedding)**
 Performs a cosine similarity search using the provided question embedding. Returns the most similar chunk of text and the associated original filename.
 
-vector_search_cosine_distance(client, question_embedding)
+**vector_search_cosine_distance(client, question_embedding)**
 Performs a cosine distance search using the provided question embedding. Returns the most similar chunk of text and the associated original filename.
 
-ann_search(client, query_embedding, window_size=2, top_n=5)
+**ann_search(client, query_embedding, window_size=2, top_n=5)**
 Performs an approximate nearest neighbor (ANN) search using the provided query embedding. Returns the top matching chunks and their descriptions if they are PDF files.
 
-euclidean_search(client, question_embedding)
+**euclidean_search(client, question_embedding)**
 Performs a Euclidean distance search using the provided question embedding. Returns the most similar chunk of text and the associated original filename.
 
-query_clickhouse_word_with_multi_stage(client, important_words, query_embedding, top_n=5)
+**query_clickhouse_word_with_multi_stage(client, important_words, query_embedding, top_n=5)**
 Executes a multi-stage search combining keyword matching and semantic similarity. Returns the top matching chunks and descriptions for PDF files.
 
-get_pdf_description(filename)
+**get_pdf_description(filename)**
 Retrieves a brief description of a PDF file based on its content from the database. The description is truncated to 300 characters.
 
-deduplicate_results(closest_chunks, top_n)
+**deduplicate_results(closest_chunks, top_n)**
 Removes duplicate results from a list of chunks based on their filenames. Returns unique chunks and their filenames.
 
-structure_sentence_with_llama(query, chunk_text, llama_tokenizer, llama_model)
+**structure_sentence_with_llama(query, chunk_text, llama_tokenizer, llama_model)**
 Structures a given chunk of text in response to a query using the LLaMA model. Returns the structured text.
 
-structure_sentence(query, chunk_text)
-Structures a given chunk of text in response to a query using OpenAI's GPT-3.5-turbo model. Returns the structured text.
-
-structure_chunk_text(query, chunk_text)
+**structure_chunk_text(query, chunk_text)**
 Formats a given chunk of text without making any changes to its content using OpenAI's GPT-3.5-turbo model. Returns the formatted text.
 
-process_query_clickhouse(query_text, search_method='ann_search')
+**process_query_clickhouse(query_text, search_method='ann_search')**
 processes a query by generating embeddings and performing a specified search method in the ClickHouse database. Returns the most relevant chunk of text and its filename.
 
-process_query_clickhouse_pdf(query_text, top_n=5)
+**process_query_clickhouse_pdf(query_text, top_n=5)**
 Processes a query by extracting important words, generating embeddings, performing a multi-stage search, and retrieving descriptions for the top PDF files. Returns the most relevant contexts, filenames, and descriptions.
 
 search_query.py:
