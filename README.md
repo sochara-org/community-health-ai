@@ -44,6 +44,19 @@ Home Page: Enter a query to receive a structured response based on the most rele
 About Page: Information about the project.
 
 ### functions.py
+
+This Python script provides functionality for querying and processing PDF documents using natural language processing and vector search techniques.
+
+## Features
+
+- PDF text extraction and embedding generation
+- Vector search using various methods (cosine similarity, Euclidean distance, ANN)
+- Integration with ClickHouse database for efficient data storage and retrieval
+- Multi-stage query processing for improved search results
+- PDF description retrieval
+- Result deduplication
+
+
 **initialize_clickhouse_connection()**
 Initializes a connection to the ClickHouse database using the credentials and configurations stored in environment variables.
 
