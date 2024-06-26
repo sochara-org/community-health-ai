@@ -230,5 +230,37 @@ The HTML structure is divided into several main sections:
 **main()** Processes all PDF files in a specified directory.
 
 
+### pdf_downloading.py
+
+This script automates the process of downloading PDF files based on metadata retrieved from a specified API.
+
+### Key Components:
+
+**Environment Setup** Uses `dotenv` to load environment variables from a `.env` file.
+ - Retrieves crucial URLs and directory paths from environment variables:
+     - `METADATA_URL`: API endpoint for metadata
+     - `OUTPUT_DIRECTORY`: Where PDFs will be saved
+     - `ARCHIVE_BASE_URL`: Base URL for constructing PDF download links
+
+**Main Functions**
+
+   a. `download_pdfs_from_metadata(metadata_url, output_dir)`:
+      - Fetches metadata from the specified API
+      - Extracts PDF identifiers from the metadata
+      - Constructs individual PDF URLs
+      - Initiates download for each PDF
+
+   b. `download_pdf(pdf_url, pdf_filename)`:
+      - Downloads a single PDF file from the given URL
+      - Saves the PDF to the specified output directory
+      - Prints confirmation message upon successful download
+
+**Execution Flow**
+   - Creates the output directory if it doesn't exist
+   - Calls `download_pdfs_from_metadata()` to start the download process
+
+
+
+
 
 
