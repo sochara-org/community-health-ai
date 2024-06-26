@@ -43,7 +43,7 @@ By default, the application will be accessible at http://127.0.0.1:5000/.
 Home Page: Enter a query to receive a structured response based on the most relevant section from the database.
 About Page: Information about the project.
 
-##**functions.py**
+**functions.py**
 **initialize_clickhouse_connection()**
 Initializes a connection to the ClickHouse database using the credentials and configurations stored in environment variables.
 
