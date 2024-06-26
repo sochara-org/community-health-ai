@@ -181,13 +181,20 @@ The JavaScript handles user interaction and communication with the server.
  **Response Handling**
     - Updates the chat body with the user's message, bot's response, and any PDF links and descriptions.
  
-about.html 
- HTML structure: Defines the basic structure of the About Us page.
- CSS styles: Sets the visual appearance of the page, including header and content.
- Chat header: Displays the title and navigation buttons at the top.
- Header buttons: Provides links to About Us, Ask Your Question, and Donate pages.
- Content wrapper: Contains the main content of the About Us page.
- About NGO section: Displays information about the organization's mission and focus areas.
+### about.html 
+ ## Overview
+The About Us page provides information about the organization, its mission, and focus areas. The page includes a header with navigation buttons, and a content section with details about the NGO.
+
+## HTML Structure
+The HTML structure is divided into several main sections:
+
+1. **Document Type and Language**
+    - Defines the document type and language of the page.
+2. **Head Section**
+    - Contains meta information and links to stylesheets.
+3. **Body Section**
+    - Encloses the chat header and content wrapper.
+
 
 requirements.txt
 Flask==2.0.1: Web framework for creating the application's interface and handling HTTP requests.
