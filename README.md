@@ -244,13 +244,13 @@ This script automates the process of downloading PDF files based on metadata ret
 
 **Main Functions**
 
-   a. `download_pdfs_from_metadata(metadata_url, output_dir)`:
+**download_pdfs_from_metadata(metadata_url, output_dir)**
       - Fetches metadata from the specified API
       - Extracts PDF identifiers from the metadata
       - Constructs individual PDF URLs
       - Initiates download for each PDF
 
-   b. `download_pdf(pdf_url, pdf_filename)`:
+**download_pdf(pdf_url, pdf_filename)**
       - Downloads a single PDF file from the given URL
       - Saves the PDF to the specified output directory
       - Prints confirmation message upon successful download
