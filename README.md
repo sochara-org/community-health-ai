@@ -214,10 +214,15 @@ The HTML structure is divided into several main sections:
 
 ### pdf_uploading.py
 **create_clickhouse_tables()** Sets up necessary tables in ClickHouse.
+
 **insert_pdf_summary()** Inserts a new entry for a PDF file into the database.
+
 **extract_text_from_pdf()** Extracts text from PDF files, including OCR for scanned documents.
+
 **insert_chunks()** Splits PDF text into chunks, generates embeddings, and inserts into the database.
+
 **process_pdf_file()** Orchestrates the processing of a single PDF file.
+
 **main()** Processes all PDF files in a specified directory.
 
 
