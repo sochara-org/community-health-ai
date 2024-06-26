@@ -1,4 +1,4 @@
-# Mental Health Web Based Application
+# Mental Health Knowledge Base Web Application
 
 This project implements a query processing and vector search application using various machine learning models and a ClickHouse database. The application processes queries, generates embeddings, and ranks or retrieves relevant sections from a database.
 
