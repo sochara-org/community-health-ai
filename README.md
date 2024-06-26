@@ -10,8 +10,7 @@ This project was developed by Difinative Technologies in collaboration with SOCH
 2. [Installation](#installation)
    - [Prerequisites](#prerequisites)
    - [Setup](#setup)
-3. [Flask Application](#flask-application)
-4. [Components](#components)
+3. [Components](#components)
    - [functions.py](#functionspy)
    - [search_query.py](#search_querypy)
    - [Templates](#templates)
@@ -19,7 +18,7 @@ This project was developed by Difinative Technologies in collaboration with SOCH
      - [about.html](#abouthtml)
    - [pdf_uploading.py](#pdf_uploadingpy)
    - [pdf_downloading.py](#pdf_downloadingpy)
-5. [Requirements](#requirements)
+4. [Requirements](#requirements)
 
 ## Features
 
