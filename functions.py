@@ -341,27 +341,7 @@ def structure_sentence_with_llama(query, chunk_text, llama_tokenizer, llama_mode
         return None
     
 
-def structure_sentence(query, chunk_text):
-    try:
-        messages = [
-            {"role": "system", "content": f"Question: {query}"},
-            {"role": "system", "content": f"Answer: {chunk_text}"}
-        ]
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=messages,
-            max_tokens=100,
-            temperature=0.01,
-            top_p=1.0,
-            frequency_penalty=0.0,
-            presence_penalty=0.0,
-            stop=[]
-        )
-        completion_text = response.choices[0].message.content
-        return completion_text.strip()
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        return None
+
 
 def structure_chunk_text(query, chunk_text):
     try:
