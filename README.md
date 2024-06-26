@@ -201,33 +201,56 @@ The HTML structure is divided into several main sections:
 
 
 
-### requirements.txt
-- **Flask**: Web framework for creating the application's interface and handling HTTP requests.
-- **torch**: Deep learning library used for neural network operations and tensor computations.
-- **transformers**: Provides pre-trained models like BERT for natural language processing tasks.
-- **clickhouse-driver**: Client library for interacting with the ClickHouse database.
-- **scipy**: Scientific computing library, used here for distance calculations in vector searches.
-- **python-dotenv**: Loads environment variables from a .env file for configuration management.
-- **nltk**: Natural Language Toolkit for text processing tasks like tokenization.
-- **openai**: Client library for interacting with OpenAI's API, used for GPT-3.5 text generation.
-- **PyPDF2**: Library for reading and extracting text from PDF files.
-- **uuid**: Generates unique identifiers for database entries.
-- **pytesseract**: OCR tool for extracting text from images (used for scanned PDFs).
-- **pdf2image**: Converts PDF pages to images for OCR processing.
-
-
 ### pdf_uploading.py
-**create_clickhouse_tables()** Sets up necessary tables in ClickHouse.
 
-**insert_pdf_summary()** Inserts a new entry for a PDF file into the database.
+This script processes PDF files, extracts text, generates embeddings, and stores the data in a ClickHouse database.
 
-**extract_text_from_pdf()** Extracts text from PDF files, including OCR for scanned documents.
+## Features
 
-**insert_chunks()** Splits PDF text into chunks, generates embeddings, and inserts into the database.
+- Extracts text from PDF files
+- Generates text embeddings using BERT
+- Stores PDF summaries and text chunks in ClickHouse
+- Handles both text-based and scanned PDFs
+- Avoids duplicate processing of PDFs
 
-**process_pdf_file()** Orchestrates the processing of a single PDF file.
+## Setup
 
-**main()** Processes all PDF files in a specified directory.
+1. Clone the repository
+2. Install dependencies: `pip install -r requirements.txt`
+3. Set up a `.env` file with the following variables:
+
+The script will:
+1. Create necessary ClickHouse tables if they don't exist
+2. Process all PDF files in the specified directory
+3. Extract text, generate embeddings, and store data in ClickHouse
+
+## Main Functions
+
+**create_clickhouse_tables()** Sets up required tables in ClickHouse
+**insert_pdf_summary()** Inserts a new PDF summary into the database
+**extract_text_from_pdf()** Extracts text from PDF files (including OCR for scanned PDFs)
+**insert_chunks()** Processes text chunks, generates embeddings, and inserts into database
+**process_pdf_file()** Orchestrates the processing of a single PDF file
+**main()** Main function to process all PDFs in the specified directory
+
+## Database Schema
+
+1. `abc_table`: Stores PDF summaries
+   - Columns: id (UUID), user_name, original_filename, summarized_text
+
+2. `abc_chunks`: Stores text chunks and their embeddings
+   - Columns: id, summary_id, chunk_text, embeddings
+
+An index is created on the embeddings column for efficient similarity searches.
+
+## Note
+
+This script is designed to handle large numbers of PDF files. It uses BERT for generating text embeddings, which are stored for later use in search or analysis tasks.
+
+## Error Handling
+
+The script includes error handling to manage issues that may arise during PDF processing or database operations. Check the console output for any error messages.
+
 
 
 ### pdf_downloading.py
@@ -260,6 +283,19 @@ This script automates the process of downloading PDF files based on metadata ret
    - Calls `download_pdfs_from_metadata()` to start the download process
 
 
+### requirements.txt
+- **Flask**: Web framework for creating the application's interface and handling HTTP requests.
+- **torch**: Deep learning library used for neural network operations and tensor computations.
+- **transformers**: Provides pre-trained models like BERT for natural language processing tasks.
+- **clickhouse-driver**: Client library for interacting with the ClickHouse database.
+- **scipy**: Scientific computing library, used here for distance calculations in vector searches.
+- **python-dotenv**: Loads environment variables from a .env file for configuration management.
+- **nltk**: Natural Language Toolkit for text processing tasks like tokenization.
+- **openai**: Client library for interacting with OpenAI's API, used for GPT-3.5 text generation.
+- **PyPDF2**: Library for reading and extracting text from PDF files.
+- **uuid**: Generates unique identifiers for database entries.
+- **pytesseract**: OCR tool for extracting text from images (used for scanned PDFs).
+- **pdf2image**: Converts PDF pages to images for OCR processing.
 
 
 
