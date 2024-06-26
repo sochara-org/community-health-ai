@@ -99,41 +99,53 @@ processes a query by generating embeddings and performing a specified search met
 Processes a query by extracting important words, generating embeddings, performing a multi-stage search, and retrieving descriptions for the top PDF files. Returns the most relevant contexts, filenames, and descriptions.
 
 ### search_query.py
- **Imports**
- Brings in necessary modules and functions for the application.
- 
- **Flask app initialization**
- Creates the Flask application instance.
- 
- **Logging setup**
- Configures basic logging for the application.
- 
- **Warning suppression**
- Ignores specific deprecation warnings.
- 
- **Conversation history**
- Initializes an empty list to store chat history.
- 
- **Main route ('/') handler**
- Processes GET and POST requests for the main chat interface.
- 
- **Query processing**
- Calls functions to process user queries and retrieve responses.
- 
- **Response formatting**
- Structures the bot's reply, PDF URLs, and descriptions.
- 
- **Conversation history update**
- Adds the latest interaction to the history.
- 
- **Template rendering**
- Returns the rendered HTML for the chat interface.
- 
- **About route ('/about') handler**
- Renders the About Us page.
- 
- **Application runner**
- Starts the Flask application in debug mode when run directly.
+
+This file contains the main Flask application for the chat interface.
+
+#### Key Components:
+
+1. **Imports**
+   - Imports necessary modules and functions, including Flask and custom functions.
+
+2. **Flask App Initialization**
+   - Creates the Flask application instance.
+
+3. **Logging and Warning Configuration**
+   - Sets up basic logging and suppresses specific deprecation warnings.
+
+4. **Conversation History**
+   - Initializes an empty list to store the chat history.
+
+5. **Main Route ('/')**
+   - Handles both GET and POST requests for the main chat interface.
+   - POST request processing:
+     - Retrieves the user's query.
+     - Calls `process_query_clickhouse_pdf` to get responses and PDF information.
+     - Formats the response with bot reply, PDF URLs, and descriptions.
+     - Updates the conversation history.
+   - GET request:
+     - Renders the main chat interface template.
+
+6. **About Route ('/about')**
+   - Renders the About Us page.
+
+7. **Error Handling**
+   - Provides basic error responses for invalid queries or processing errors.
+
+8. **Application Runner**
+   - Starts the Flask application in debug mode when the script is run directly.
+
+#### Key Functions:
+
+- `index()`: Main route handler for the chat interface.
+- `about()`: Handler for the About page.
+
+#### Templates Used:
+
+- `index.html`: Main chat interface template.
+- `about.html`: About page template.
+
+This script sets up a web application that allows users to interact with a chat interface, process queries, and receive responses along with relevant PDF information. It maintains a conversation history and provides a simple About page.
 
 ### Templates
 ### index.html 
