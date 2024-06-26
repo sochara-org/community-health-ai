@@ -1,10 +1,10 @@
-Mental Health Knowledge Base Web Application
+#### Mental Health Knowledge Base Web Application
 
 This project implements a query processing and vector search application using various machine learning models and a ClickHouse database. The application processes queries, generates embeddings, and ranks or retrieves relevant sections from a database.
 
 This project was developed by Difinative Technologies in collaboration with SOCHARA.
 
- Table of Contents
+ ### Table of Contents
 
 1. [Features](#features)
 2. [Installation](#installation)
@@ -88,7 +88,8 @@ This Python script provides functionality for querying and processing PDF docume
 - Multi-stage query processing for improved search results
 - PDF description retrieval
 - Result deduplication
-
+  
+### Key Functions:
 
 initialize_clickhouse_connection()
 Initializes a connection to the ClickHouse database using the credentials and configurations stored in environment variables.
@@ -148,7 +149,7 @@ Processes a query by extracting important words, generating embeddings, performi
 
 This file contains the main Flask application for the chat interface.
 
-#### Key Components:
+### Key Functions:
 Imports: Imports necessary modules and functions, including Flask and custom functions.
 
 Flask App Initialization: Creates the Flask application instance.
@@ -293,7 +294,7 @@ The script will:
 2. Process all PDF files in the specified directory
 3. Extract text, generate embeddings, and store data in ClickHouse
 
-## Main Functions
+### Key Functions:
 
 create_clickhouse_tables(): Sets up required tables in ClickHouse
 
@@ -341,7 +342,7 @@ Environment Setup Uses `dotenv` to load environment variables from a `.env` file
        
      - `ARCHIVE_BASE_URL`: Base URL for constructing PDF download links
 
-## Main Functions
+### Key Functions:
 
 download_pdfs_from_metadata(metadata_url, output_dir)
       - Fetches metadata from the specified API
