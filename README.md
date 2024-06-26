@@ -103,20 +103,15 @@ Processes a query by extracting important words, generating embeddings, performi
 This file contains the main Flask application for the chat interface.
 
 #### Key Components:
+**Imports** Imports necessary modules and functions, including Flask and custom functions.
 
-1. **Imports**
-   - Imports necessary modules and functions, including Flask and custom functions.
+**Flask App Initialization**Creates the Flask application instance.
 
-2. **Flask App Initialization**
-   - Creates the Flask application instance.
+**Logging and Warning Configuration** Sets up basic logging and suppresses specific deprecation warnings.
 
-3. **Logging and Warning Configuration**
-   - Sets up basic logging and suppresses specific deprecation warnings.
+**Conversation History** Initializes an empty list to store the chat history.
 
-4. **Conversation History**
-   - Initializes an empty list to store the chat history.
-
-5. **Main Route ('/')**
+**Main Route ('/')**
    - Handles both GET and POST requests for the main chat interface.
    - POST request processing:
      - Retrieves the user's query.
@@ -126,14 +121,11 @@ This file contains the main Flask application for the chat interface.
    - GET request:
      - Renders the main chat interface template.
 
-6. **About Route ('/about')**
-   - Renders the About Us page.
+**About Route ('/about')** Renders the About Us page.
 
-7. **Error Handling**
-   - Provides basic error responses for invalid queries or processing errors.
+**Error Handling** Provides basic error responses for invalid queries or processing errors.
 
-8. **Application Runner**
-   - Starts the Flask application in debug mode when the script is run directly.
+**Application Runner** Starts the Flask application in debug mode when the script is run directly.
 
 #### Key Functions:
 
