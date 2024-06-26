@@ -1,4 +1,25 @@
+# Mental Health Web Based Application
+
 This project implements a query processing and vector search application using various machine learning models and a ClickHouse database. The application processes queries, generates embeddings, and ranks or retrieves relevant sections from a database.
+
+This project was developed by Difinative Technologies in collaboration with SOCHARA.
+
+## Table of Contents
+
+1. [Features](#features)
+2. [Installation](#installation)
+   - [Prerequisites](#prerequisites)
+   - [Setup](#setup)
+3. [Flask Application](#flask-application)
+4. [Components](#components)
+   - [functions.py](#functionspy)
+   - [search_query.py](#search_querypy)
+   - [Templates](#templates)
+     - [index.html](#indexhtml)
+     - [about.html](#abouthtml)
+   - [pdf_uploading.py](#pdf_uploadingpy)
+   - [pdf_downloading.py](#pdf_downloadingpy)
+5. [Requirements](#requirements
 
 ## Features
 
