@@ -98,6 +98,16 @@ about.html
  Header buttons: Provides links to About Us, Ask Your Question, and Donate pages.
  Content wrapper: Contains the main content of the About Us page.
  About NGO section: Displays information about the organization's mission and focus areas.
+
+requirements.txt
+Flask==2.0.1: Web framework for creating the application's interface and handling HTTP requests.
+torch==1.9.0: Deep learning library used for neural network operations and tensor computations.
+transformers==4.9.2: Provides pre-trained models like BERT for natural language processing tasks.
+clickhouse-driver==0.2.0: Client library for interacting with the ClickHouse database.
+scipy==1.7.1: Scientific computing library, used here for distance calculations in vector searches.
+python-dotenv==0.19.0: Loads environment variables from a .env file for configuration management.
+nltk==3.6.2: Natural Language Toolkit for text processing tasks like tokenization.
+openai==0.27.0: Client library for interacting with OpenAI's API, used for GPT-3.5 text generation.
    
 
 
