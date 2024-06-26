@@ -50,11 +50,24 @@ This project was developed by Difinative Technologies in collaboration with SOCH
 
 3. Set up the .env file with the necessary environment variables:
    OPENAI_API_KEY=your_openai_api_key
+   
    CLICKHOUSE_HOST=your_clickhouse_host
+   
    CLICKHOUSE_PORT=your_clickhouse_port
+   
    CLICKHOUSE_USER=your_clickhouse_user
+   
    CLICKHOUSE_PASSWORD=your_clickhouse_password
+   
    CLICKHOUSE_DATABASE=your_clickhouse_database
+
+   METADATA_URL=https://example.com/metadata_api
+
+   OUTPUT_DIRECTORY=/path/to/pdf_downloads
+
+   ARCHIVE_BASE_URL=https://example.com/archive_base
+
+   PDF_DIRECTORY=/path/to/data_directory
 
 
 By default, the application will be accessible at http://127.0.0.1:5000/.
