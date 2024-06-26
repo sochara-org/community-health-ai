@@ -137,25 +137,49 @@ Processes a query by extracting important words, generating embeddings, performi
 
 ### Templates
 ### index.html 
- **HTML structure**
- Defines the basic structure of the web page.
- 
- **CSS styles**
- Sets the visual appearance of the chat interface.
- 
- **Body background**
- Uses an image URL for the page background.
- 
- **Chat header**
- Displays the title and navigation buttons at the top.
- Chat container: Holds the main chat interface elements.
- Chat body: Contains the conversation history.
- Message styling: Defines different styles for user and bot messages.
- Chat footer: Provides an input field and send button for user queries.
- Loading animation: Shows a spinner while waiting for responses.
- JavaScript: Handles form submission, API calls, and dynamic content updates.
- Conversation loop: Iterates through conversation history to display messages.
- PDF link display: Shows links to relevant PDF documents with descriptions.
+## HTML Structure
+The HTML structure is divided into several main sections:
+
+ **Header**
+    - Contains the title of the chatbot and navigation buttons.
+ **Chat Container**
+    - Encloses the chat header, chat body, and chat footer.
+ **Chat Body**
+    - Displays the conversation history between the user and the bot.
+ **Chat Footer**
+    - Contains the input form for users to type and send their messages.
+ **Loading Animation**
+    - Displays a spinner animation while the chatbot processes the user query.
+
+## CSS Styling
+The CSS styles enhance the appearance and layout of the interface.
+
+### Key Styles:
+ **Body**
+    - Background image, font settings, and overall layout.
+ **Chat Header**
+    - Fixed position with background color and text alignment.
+ **Header Buttons**
+    - Style for the navigation buttons with hover effects.
+ **Chat Container and Body**
+    - Layout settings for chat display, including flexbox settings.
+ **Messages**
+    - Styles for user and bot messages with different background colors.
+ **Loading Animation**
+    - Spinner animation to indicate processing.
+
+## JavaScript Functionality
+The JavaScript handles user interaction and communication with the server.
+
+### Key Functions:
+ **Scroll to Bottom**
+    - Ensures the chat scrolls to the latest message.
+ **Form Submission**
+    - Handles user input and sends it to the server using XMLHttpRequest.
+ **Loading Animation**
+    - Displays a spinner while the server processes the query.
+ **Response Handling**
+    - Updates the chat body with the user's message, bot's response, and any PDF links and descriptions.
  
 about.html 
  HTML structure: Defines the basic structure of the About Us page.
