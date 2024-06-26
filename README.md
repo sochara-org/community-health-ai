@@ -45,35 +45,86 @@ About Page: Information about the project.
 
 Key Functions:
 functions.py
-initialize_clickhouse_connection: Establishes a ClickHouse database connection.
-initialize_tokenizer_and_model: Initializes a tokenizer and model for generating embeddings.
-generate_embeddings: Generates embeddings for a given query text.
-rank_sections: Ranks text sections based on cosine similarity to the query.
-cosine_similarity: Retrieves the most similar section using cosine similarity.
-vector_search_cosine_distance: Retrieves the most similar section using cosine distance.
-ann_search: Retrieves the most similar section using approximate nearest neighbors search.
-euclidean_search: Retrieves the most similar section using Euclidean distance.
-extract_important_words: Extracts important words from the query text.
-ann_search_on_chunks: Performs approximate nearest neighbors search on chunks containing important words.
-get_surrounding_chunks: Retrieves surrounding chunks for additional context.
-structure_sentence: Structures text using the GPT-3.5 model.
-structure_chunk_text: Formats text without adding or removing content.
-process_query: Processes a query and returns a structured response.
-process_query_clickhouse: Processes a query using different search methods and returns a structured response.
-process_query_clickhouse_word: Processes a query by extracting important words and retrieving surrounding context.
+initialize_clickhouse_connection()
+Initializes a connection to the ClickHouse database using the credentials and configurations stored in environment variables.
+
+initialize_tokenizer_and_model()
+Loads a pre-trained BERT tokenizer and model from the Hugging Face library. If the tokenizer lacks a padding token, it assigns a default one.
+
+initialize_llama_model()
+Loads a pre-trained LLaMA tokenizer and model from the Hugging Face library for causal language modeling tasks.
+
+generate_embeddings(tokenizer, model, query)
+Generates embeddings for a given query text using the provided tokenizer and model. Returns the pooled embedding vector.
+
+extract_important_words(query_text)
+Extracts important words from a given query text, excluding common stop words. Returns a list of significant words.
+
+get_surrounding_chunks(client, id, summary_id, window_size=2)
+Fetches chunks of text surrounding a specific chunk from the database. The window_size parameter determines how many chunks before and after should be included.
+
+get_original_filename(client, summary_id)
+Retrieves the original filename associated with a given summary ID from the database, processes it, and constructs the full file URL.
+
+cosine_similarity(client, question_embedding)
+Performs a cosine similarity search using the provided question embedding. Returns the most similar chunk of text and the associated original filename.
+
+vector_search_cosine_distance(client, question_embedding)
+Performs a cosine distance search using the provided question embedding. Returns the most similar chunk of text and the associated original filename.
+
+ann_search(client, query_embedding, window_size=2, top_n=5)
+Performs an approximate nearest neighbor (ANN) search using the provided query embedding. Returns the top matching chunks and their descriptions if they are PDF files.
+
+euclidean_search(client, question_embedding)
+Performs a Euclidean distance search using the provided question embedding. Returns the most similar chunk of text and the associated original filename.
+
+query_clickhouse_word_with_multi_stage(client, important_words, query_embedding, top_n=5)
+Executes a multi-stage search combining keyword matching and semantic similarity. Returns the top matching chunks and descriptions for PDF files.
+
+get_pdf_description(filename)
+Retrieves a brief description of a PDF file based on its content from the database. The description is truncated to 300 characters.
+
+deduplicate_results(closest_chunks, top_n)
+Removes duplicate results from a list of chunks based on their filenames. Returns unique chunks and their filenames.
+
+structure_sentence_with_llama(query, chunk_text, llama_tokenizer, llama_model)
+Structures a given chunk of text in response to a query using the LLaMA model. Returns the structured text.
+
+structure_sentence(query, chunk_text)
+Structures a given chunk of text in response to a query using OpenAI's GPT-3.5-turbo model. Returns the structured text.
+
+structure_chunk_text(query, chunk_text)
+Formats a given chunk of text without making any changes to its content using OpenAI's GPT-3.5-turbo model. Returns the formatted text.
+
+process_query_clickhouse(query_text, search_method='ann_search')
+processes a query by generating embeddings and performing a specified search method in the ClickHouse database. Returns the most relevant chunk of text and its filename.
+
+process_query_clickhouse_pdf(query_text, top_n=5)
+Processes a query by extracting important words, generating embeddings, performing a multi-stage search, and retrieving descriptions for the top PDF files. Returns the most relevant contexts, filenames, and descriptions.
 
 search_query.py:
  Imports: Brings in necessary modules and functions for the application.
+ 
  Flask app initialization: Creates the Flask application instance.
+ 
  Logging setup: Configures basic logging for the application.
+ 
  Warning suppression: Ignores specific deprecation warnings.
+ 
  Conversation history: Initializes an empty list to store chat history.
+ 
  Main route ('/') handler: Processes GET and POST requests for the main chat interface.
+ 
  Query processing: Calls functions to process user queries and retrieve responses.
+ 
  Response formatting: Structures the bot's reply, PDF URLs, and descriptions.
+ 
  Conversation history update: Adds the latest interaction to the history.
+ 
  Template rendering: Returns the rendered HTML for the chat interface.
+ 
  About route ('/about') handler: Renders the About Us page.
+ 
  Application runner: Starts the Flask application in debug mode when run directly.
 
 Templates
