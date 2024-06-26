@@ -192,12 +192,16 @@ The HTML structure is divided into several main sections:
 
  **Header**
     - Contains the title of the chatbot and navigation buttons.
+ 
  **Chat Container**
     - Encloses the chat header, chat body, and chat footer.
+ 
  **Chat Body**
     - Displays the conversation history between the user and the bot.
+ 
  **Chat Footer**
     - Contains the input form for users to type and send their messages.
+ 
  **Loading Animation**
     - Displays a spinner animation while the chatbot processes the user query.
 
@@ -207,14 +211,19 @@ The CSS styles enhance the appearance and layout of the interface.
 ### Key Styles:
  **Body**
     - Background image, font settings, and overall layout.
+ 
  **Chat Header**
     - Fixed position with background color and text alignment.
+ 
  **Header Buttons**
     - Style for the navigation buttons with hover effects.
+ 
  **Chat Container and Body**
     - Layout settings for chat display, including flexbox settings.
+ 
  **Messages**
     - Styles for user and bot messages with different background colors.
+ 
  **Loading Animation**
     - Spinner animation to indicate processing.
 
@@ -224,10 +233,13 @@ The JavaScript handles user interaction and communication with the server.
 ### Key Functions:
  **Scroll to Bottom**
     - Ensures the chat scrolls to the latest message.
+ 
  **Form Submission**
     - Handles user input and sends it to the server using XMLHttpRequest.
+ 
  **Loading Animation**
     - Displays a spinner while the server processes the query.
+ 
  **Response Handling**
     - Updates the chat body with the user's message, bot's response, and any PDF links and descriptions.
  
@@ -273,10 +285,15 @@ The script will:
 ## Main Functions
 
 **create_clickhouse_tables()** Sets up required tables in ClickHouse
+
 **insert_pdf_summary()** Inserts a new PDF summary into the database
+
 **extract_text_from_pdf()** Extracts text from PDF files (including OCR for scanned PDFs)
+
 **insert_chunks()** Processes text chunks, generates embeddings, and inserts into database
+
 **process_pdf_file()** Orchestrates the processing of a single PDF file
+
 **main()** Main function to process all PDFs in the specified directory
 
 ## Database Schema
