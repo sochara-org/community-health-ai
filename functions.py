@@ -23,7 +23,7 @@ print("Current Working Directory:", os.getcwd())
 if 'OPENAI_API_KEY' in os.environ:
     del os.environ['OPENAI_API_KEY']
 
-dotenv_path = 'a.env'
+dotenv_path = '.env'
 
 if not os.path.exists(dotenv_path):
     raise FileNotFoundError(f"The .env file at path '{dotenv_path}' does not exist.")
