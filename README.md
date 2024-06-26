@@ -98,37 +98,56 @@ processes a query by generating embeddings and performing a specified search met
 **process_query_clickhouse_pdf(query_text, top_n=5)**
 Processes a query by extracting important words, generating embeddings, performing a multi-stage search, and retrieving descriptions for the top PDF files. Returns the most relevant contexts, filenames, and descriptions.
 
-search_query.py:
- Imports: Brings in necessary modules and functions for the application.
+### search_query.py:
+ **Imports**
+ Brings in necessary modules and functions for the application.
  
- Flask app initialization: Creates the Flask application instance.
+ **Flask app initialization**
+ Creates the Flask application instance.
  
- Logging setup: Configures basic logging for the application.
+ **Logging setup**
+ Configures basic logging for the application.
  
- Warning suppression: Ignores specific deprecation warnings.
+ **Warning suppression**
+ Ignores specific deprecation warnings.
  
- Conversation history: Initializes an empty list to store chat history.
+ **Conversation history**
+ Initializes an empty list to store chat history.
  
- Main route ('/') handler: Processes GET and POST requests for the main chat interface.
+ **Main route ('/') handler**
+ Processes GET and POST requests for the main chat interface.
  
- Query processing: Calls functions to process user queries and retrieve responses.
+ **Query processing**
+ Calls functions to process user queries and retrieve responses.
  
- Response formatting: Structures the bot's reply, PDF URLs, and descriptions.
+ **Response formatting**
+ Structures the bot's reply, PDF URLs, and descriptions.
  
- Conversation history update: Adds the latest interaction to the history.
+ **Conversation history update**
+ Adds the latest interaction to the history.
  
- Template rendering: Returns the rendered HTML for the chat interface.
+ **Template rendering**
+ Returns the rendered HTML for the chat interface.
  
- About route ('/about') handler: Renders the About Us page.
+ **About route ('/about') handler**
+ Renders the About Us page.
  
- Application runner: Starts the Flask application in debug mode when run directly.
+ **Application runner**
+ Starts the Flask application in debug mode when run directly.
 
-Templates
-index.html 
- HTML structure: Defines the basic structure of the web page.
- CSS styles: Sets the visual appearance of the chat interface.
- Body background: Uses an image URL for the page background.
- Chat header: Displays the title and navigation buttons at the top.
+### Templates
+### index.html 
+ **HTML structure**
+ Defines the basic structure of the web page.
+ 
+ **CSS styles**
+ Sets the visual appearance of the chat interface.
+ 
+ **Body background**
+ Uses an image URL for the page background.
+ 
+ **Chat header**
+ Displays the title and navigation buttons at the top.
  Chat container: Holds the main chat interface elements.
  Chat body: Contains the conversation history.
  Message styling: Defines different styles for user and bot messages.
