@@ -196,15 +196,17 @@ The HTML structure is divided into several main sections:
     - Encloses the chat header and content wrapper.
 
 
-requirements.txt
-Flask==2.0.1: Web framework for creating the application's interface and handling HTTP requests.
-torch==1.9.0: Deep learning library used for neural network operations and tensor computations.
-transformers==4.9.2: Provides pre-trained models like BERT for natural language processing tasks.
-clickhouse-driver==0.2.0: Client library for interacting with the ClickHouse database.
-scipy==1.7.1: Scientific computing library, used here for distance calculations in vector searches.
-python-dotenv==0.19.0: Loads environment variables from a .env file for configuration management.
-nltk==3.6.2: Natural Language Toolkit for text processing tasks like tokenization.
-openai==0.27.0: Client library for interacting with OpenAI's API, used for GPT-3.5 text generation.
+
+### requirements.txt
+- **Flask**: Web framework for creating the application's interface and handling HTTP requests.
+- **torch**: Deep learning library used for neural network operations and tensor computations.
+- **transformers**: Provides pre-trained models like BERT for natural language processing tasks.
+- **clickhouse-driver**: Client library for interacting with the ClickHouse database.
+- **scipy**: Scientific computing library, used here for distance calculations in vector searches.
+- **python-dotenv**: Loads environment variables from a .env file for configuration management.
+- **nltk**: Natural Language Toolkit for text processing tasks like tokenization.
+- **openai**: Client library for interacting with OpenAI's API, used for GPT-3.5 text generation.
+
 
 PDF Insertion
 create_clickhouse_tables: Creates the necessary tables in ClickHouse database if they don't already exist.
