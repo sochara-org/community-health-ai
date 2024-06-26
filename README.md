@@ -89,7 +89,7 @@ This Python script provides functionality for querying and processing PDF docume
 - PDF description retrieval
 - Result deduplication
   
-### Key Functions:
+## Key Functions:
 
 initialize_clickhouse_connection()
 Initializes a connection to the ClickHouse database using the credentials and configurations stored in environment variables.
@@ -145,11 +145,11 @@ processes a query by generating embeddings and performing a specified search met
 process_query_clickhouse_pdf(query_text, top_n=5)
 Processes a query by extracting important words, generating embeddings, performing a multi-stage search, and retrieving descriptions for the top PDF files. Returns the most relevant contexts, filenames, and descriptions.
 
-### search_query.py
+## search_query.py
 
 This file contains the main Flask application for the chat interface.
 
-### Key Functions:
+## Key Functions:
 Imports: Imports necessary modules and functions, including Flask and custom functions.
 
 Flask App Initialization: Creates the Flask application instance.
@@ -174,12 +174,12 @@ Error Handling: Provides basic error responses for invalid queries or processing
 
 Application Runner:  Starts the Flask application in debug mode when the script is run directly.
 
-#### Key Functions:
+### Key Functions:
 
 - `index()`: Main route handler for the chat interface.
 - `about()`: Handler for the About page.
 
-#### Templates Used:
+### Templates Used:
 
 - `index.html`: Main chat interface template.
 - `about.html`: About page template.
@@ -209,7 +209,7 @@ The HTML structure is divided into several main sections:
 ## CSS Styling
 The CSS styles enhance the appearance and layout of the interface.
 
-### Key Styles:
+## Key Styles:
  Body
     - Background image, font settings, and overall layout.
  
@@ -231,7 +231,7 @@ The CSS styles enhance the appearance and layout of the interface.
 ## JavaScript Functionality
 The JavaScript handles user interaction and communication with the server.
 
-### Key Functions:
+## Key Functions:
  Scroll to Bottom
     - Ensures the chat scrolls to the latest message.
  
@@ -294,7 +294,7 @@ The script will:
 2. Process all PDF files in the specified directory
 3. Extract text, generate embeddings, and store data in ClickHouse
 
-### Key Functions:
+## Key Functions:
 
 create_clickhouse_tables(): Sets up required tables in ClickHouse
 
@@ -332,7 +332,7 @@ The script includes error handling to manage issues that may arise during PDF pr
 
 This script automates the process of downloading PDF files based on metadata retrieved from a specified API.
 
-### Key Components:
+## Setup
 
 Environment Setup Uses `dotenv` to load environment variables from a `.env` file.
  - Retrieves crucial URLs and directory paths from environment variables:
@@ -342,7 +342,7 @@ Environment Setup Uses `dotenv` to load environment variables from a `.env` file
        
      - `ARCHIVE_BASE_URL`: Base URL for constructing PDF download links
 
-### Key Functions:
+## Key Functions:
 
 download_pdfs_from_metadata(metadata_url, output_dir)
       - Fetches metadata from the specified API
