@@ -337,7 +337,7 @@ This script automates the process of downloading PDF files based on metadata ret
       
       - Extracts PDF identifiers from the metadata
       
-      -Constructs individual PDF URLs
+      - Constructs individual PDF URLs
       
       - Initiates download for each PDF
 
