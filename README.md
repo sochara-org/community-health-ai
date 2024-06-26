@@ -1,10 +1,10 @@
-# Mental Health Knowledge Base Web Application
+Mental Health Knowledge Base Web Application
 
 This project implements a query processing and vector search application using various machine learning models and a ClickHouse database. The application processes queries, generates embeddings, and ranks or retrieves relevant sections from a database.
 
 This project was developed by Difinative Technologies in collaboration with SOCHARA.
 
-## Table of Contents
+ Table of Contents
 
 1. [Features](#features)
 2. [Installation](#installation)
@@ -29,15 +29,15 @@ This project was developed by Difinative Technologies in collaboration with SOCH
 - Retrieval of database sections using different search methods (cosine distance, Euclidean distance, etc.)
 - Structuring of text using language model OpenAI GPT-3.5 
 
-## Installation
+ ## Installation
 
-### Prerequisites
+ ## Prerequisites
 
 - Python 3.7 or higher
 - ClickHouse server
 - Necessary environment variables stored in a `.env` file
 
-### Setup
+## Setup
 
 1. Clone the repository:
    ```bash
@@ -90,58 +90,58 @@ This Python script provides functionality for querying and processing PDF docume
 - Result deduplication
 
 
-**initialize_clickhouse_connection()**
+initialize_clickhouse_connection()
 Initializes a connection to the ClickHouse database using the credentials and configurations stored in environment variables.
 
-**initialize_tokenizer_and_model()**
+initialize_tokenizer_and_model()
 Loads a pre-trained BERT tokenizer and model from the Hugging Face library. If the tokenizer lacks a padding token, it assigns a default one.
 
-**initialize_llama_model()**
+initialize_llama_model()
 Loads a pre-trained LLaMA tokenizer and model from the Hugging Face library for causal language modeling tasks.
 
-**generate_embeddings(tokenizer, model, query)**
+generate_embeddings(tokenizer, model, query)
 Generates embeddings for a given query text using the provided tokenizer and model. Returns the pooled embedding vector.
 
-**extract_important_words(query_text)**
+extract_important_words(query_text)
 Extracts important words from a given query text, excluding common stop words. Returns a list of significant words.
 
-**get_surrounding_chunks(client, id, summary_id, window_size=2)**
+get_surrounding_chunks(client, id, summary_id, window_size=2)
 Fetches chunks of text surrounding a specific chunk from the database. The window_size parameter determines how many chunks before and after should be included.
 
-**get_original_filename(client, summary_id)**
+get_original_filename(client, summary_id)
 Retrieves the original filename associated with a given summary ID from the database, processes it, and constructs the full file URL.
 
-**cosine_similarity(client, question_embedding)**
+cosine_similarity(client, question_embedding)
 Performs a cosine similarity search using the provided question embedding. Returns the most similar chunk of text and the associated original filename.
 
-**vector_search_cosine_distance(client, question_embedding)**
+vector_search_cosine_distance(client, question_embedding)
 Performs a cosine distance search using the provided question embedding. Returns the most similar chunk of text and the associated original filename.
 
-**ann_search(client, query_embedding, window_size=2, top_n=5)**
+ann_search(client, query_embedding, window_size=2, top_n=5)
 Performs an approximate nearest neighbor (ANN) search using the provided query embedding. Returns the top matching chunks and their descriptions if they are PDF files.
 
-**euclidean_search(client, question_embedding)**
+euclidean_search(client, question_embedding)
 Performs a Euclidean distance search using the provided question embedding. Returns the most similar chunk of text and the associated original filename.
 
-**query_clickhouse_word_with_multi_stage(client, important_words, query_embedding, top_n=5)**
+query_clickhouse_word_with_multi_stage(client, important_words, query_embedding, top_n=5)
 Executes a multi-stage search combining keyword matching and semantic similarity. Returns the top matching chunks and descriptions for PDF files.
 
-**get_pdf_description(filename)**
+get_pdf_description(filename)
 Retrieves a brief description of a PDF file based on its content from the database. The description is truncated to 300 characters.
 
-**deduplicate_results(closest_chunks, top_n)**
+deduplicate_results(closest_chunks, top_n)
 Removes duplicate results from a list of chunks based on their filenames. Returns unique chunks and their filenames.
 
-**structure_sentence_with_llama(query, chunk_text, llama_tokenizer, llama_model)**
+structure_sentence_with_llama(query, chunk_text, llama_tokenizer, llama_model)
 Structures a given chunk of text in response to a query using the LLaMA model. Returns the structured text.
 
-**structure_chunk_text(query, chunk_text)**
+structure_chunk_text(query, chunk_text)
 Formats a given chunk of text without making any changes to its content using OpenAI's GPT-3.5-turbo model. Returns the formatted text.
 
-**process_query_clickhouse(query_text, search_method='ann_search')**
+process_query_clickhouse(query_text, search_method='ann_search')
 processes a query by generating embeddings and performing a specified search method in the ClickHouse database. Returns the most relevant chunk of text and its filename.
 
-**process_query_clickhouse_pdf(query_text, top_n=5)**
+process_query_clickhouse_pdf(query_text, top_n=5)
 Processes a query by extracting important words, generating embeddings, performing a multi-stage search, and retrieving descriptions for the top PDF files. Returns the most relevant contexts, filenames, and descriptions.
 
 ### search_query.py
@@ -149,15 +149,15 @@ Processes a query by extracting important words, generating embeddings, performi
 This file contains the main Flask application for the chat interface.
 
 #### Key Components:
-**Imports** Imports necessary modules and functions, including Flask and custom functions.
+Imports: Imports necessary modules and functions, including Flask and custom functions.
 
-**Flask App Initialization**Creates the Flask application instance.
+Flask App Initialization: Creates the Flask application instance.
 
-**Logging and Warning Configuration** Sets up basic logging and suppresses specific deprecation warnings.
+Logging and Warning Configuration: Sets up basic logging and suppresses specific deprecation warnings.
 
-**Conversation History** Initializes an empty list to store the chat history.
+Conversation History: Initializes an empty list to store the chat history.
 
-**Main Route ('/')**
+Main Route ('/')
    - Handles both GET and POST requests for the main chat interface.
    - POST request processing:
      - Retrieves the user's query.
@@ -167,11 +167,11 @@ This file contains the main Flask application for the chat interface.
    - GET request:
      - Renders the main chat interface template.
 
-**About Route ('/about')** Renders the About Us page.
+About Route ('/about'):  Renders the About Us page.
 
-**Error Handling** Provides basic error responses for invalid queries or processing errors.
+Error Handling: Provides basic error responses for invalid queries or processing errors.
 
-**Application Runner** Starts the Flask application in debug mode when the script is run directly.
+Application Runner:  Starts the Flask application in debug mode when the script is run directly.
 
 #### Key Functions:
 
@@ -190,57 +190,57 @@ This script sets up a web application that allows users to interact with a chat 
 ## HTML Structure
 The HTML structure is divided into several main sections:
 
- **Header**
+ Header
     - Contains the title of the chatbot and navigation buttons.
  
- **Chat Container**
+ Chat Container
     - Encloses the chat header, chat body, and chat footer.
  
- **Chat Body**
+ Chat Body
     - Displays the conversation history between the user and the bot.
  
- **Chat Footer**
+ Chat Footer
     - Contains the input form for users to type and send their messages.
  
- **Loading Animation**
+ Loading Animation
     - Displays a spinner animation while the chatbot processes the user query.
 
 ## CSS Styling
 The CSS styles enhance the appearance and layout of the interface.
 
 ### Key Styles:
- **Body**
+ Body
     - Background image, font settings, and overall layout.
  
- **Chat Header**
+ Chat Header
     - Fixed position with background color and text alignment.
  
- **Header Buttons**
+ Header Buttons
     - Style for the navigation buttons with hover effects.
  
- **Chat Container and Body**
+ Chat Container and Body
     - Layout settings for chat display, including flexbox settings.
  
- **Messages**
+ Messages
     - Styles for user and bot messages with different background colors.
  
- **Loading Animation**
+ Loading Animation
     - Spinner animation to indicate processing.
 
 ## JavaScript Functionality
 The JavaScript handles user interaction and communication with the server.
 
 ### Key Functions:
- **Scroll to Bottom**
+ Scroll to Bottom
     - Ensures the chat scrolls to the latest message.
  
- **Form Submission**
+ Form Submission
     - Handles user input and sends it to the server using XMLHttpRequest.
  
- **Loading Animation**
+ Loading Animation
     - Displays a spinner while the server processes the query.
  
- **Response Handling**
+ Response Handling
     - Updates the chat body with the user's message, bot's response, and any PDF links and descriptions.
  
 ### about.html 
@@ -250,11 +250,11 @@ The About Us page provides information about the organization, its mission, and 
 ## HTML Structure
 The HTML structure is divided into several main sections:
 
-1. **Document Type and Language**
+1. Document Type and Language
     - Defines the document type and language of the page.
-2. **Head Section**
+2. Head Section
     - Contains meta information and links to stylesheets.
-3. **Body Section**
+3. Body Section
     - Encloses the chat header and content wrapper.
 
 
@@ -295,17 +295,17 @@ The script will:
 
 ## Main Functions
 
-**create_clickhouse_tables()** Sets up required tables in ClickHouse
+create_clickhouse_tables(): Sets up required tables in ClickHouse
 
-**insert_pdf_summary()** Inserts a new PDF summary into the database
+insert_pdf_summary(): Inserts a new PDF summary into the database
 
-**extract_text_from_pdf()** Extracts text from PDF files (including OCR for scanned PDFs)
+extract_text_from_pdf(): Extracts text from PDF files (including OCR for scanned PDFs)
 
-**insert_chunks()** Processes text chunks, generates embeddings, and inserts into database
+insert_chunks(): Processes text chunks, generates embeddings, and inserts into database
 
-**process_pdf_file()** Orchestrates the processing of a single PDF file
+process_pdf_file(): Orchestrates the processing of a single PDF file
 
-**main()** Main function to process all PDFs in the specified directory
+main(): Main function to process all PDFs in the specified directory
 
 ## Database Schema
 
@@ -333,7 +333,7 @@ This script automates the process of downloading PDF files based on metadata ret
 
 ### Key Components:
 
-**Environment Setup** Uses `dotenv` to load environment variables from a `.env` file.
+Environment Setup Uses `dotenv` to load environment variables from a `.env` file.
  - Retrieves crucial URLs and directory paths from environment variables:
      - `METADATA_URL`: API endpoint for metadata
        
@@ -341,9 +341,9 @@ This script automates the process of downloading PDF files based on metadata ret
        
      - `ARCHIVE_BASE_URL`: Base URL for constructing PDF download links
 
-**Main Functions**
+## Main Functions
 
-**download_pdfs_from_metadata(metadata_url, output_dir)**
+download_pdfs_from_metadata(metadata_url, output_dir)
       - Fetches metadata from the specified API
       
       - Extracts PDF identifiers from the metadata
@@ -352,32 +352,32 @@ This script automates the process of downloading PDF files based on metadata ret
       
       - Initiates download for each PDF
 
-**download_pdf(pdf_url, pdf_filename)**
+download_pdf(pdf_url, pdf_filename)
       - Downloads a single PDF file from the given URL
       
       - Saves the PDF to the specified output directory
       
       - Prints confirmation message upon successful download
 
-**Execution Flow**
+Execution Flow
    - Creates the output directory if it doesn't exist
    
    - Calls `download_pdfs_from_metadata()` to start the download process
 
 
 ### requirements.txt
-- **Flask**: Web framework for creating the application's interface and handling HTTP requests.
-- **torch**: Deep learning library used for neural network operations and tensor computations.
-- **transformers**: Provides pre-trained models like BERT for natural language processing tasks.
-- **clickhouse-driver**: Client library for interacting with the ClickHouse database.
-- **scipy**: Scientific computing library, used here for distance calculations in vector searches.
-- **python-dotenv**: Loads environment variables from a .env file for configuration management.
-- **nltk**: Natural Language Toolkit for text processing tasks like tokenization.
-- **openai**: Client library for interacting with OpenAI's API, used for GPT-3.5 text generation.
-- **PyPDF2**: Library for reading and extracting text from PDF files.
-- **uuid**: Generates unique identifiers for database entries.
-- **pytesseract**: OCR tool for extracting text from images (used for scanned PDFs).
-- **pdf2image**: Converts PDF pages to images for OCR processing.
+- Flask: Web framework for creating the application's interface and handling HTTP requests.
+- torch: Deep learning library used for neural network operations and tensor computations.
+- transformers: Provides pre-trained models like BERT for natural language processing tasks.
+- clickhouse-driver: Client library for interacting with the ClickHouse database.
+- scipy: Scientific computing library, used here for distance calculations in vector searches.
+- python-dotenv: Loads environment variables from a .env file for configuration management.
+- nltk: Natural Language Toolkit for text processing tasks like tokenization.
+- openai: Client library for interacting with OpenAI's API, used for GPT-3.5 text generation.
+- PyPDF2: Library for reading and extracting text from PDF files.
+- uuid: Generates unique identifiers for database entries.
+- pytesseract: OCR tool for extracting text from images (used for scanned PDFs).
+- pdf2image: Converts PDF pages to images for OCR processing.
 
 
 
