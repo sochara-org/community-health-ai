@@ -108,7 +108,15 @@ scipy==1.7.1: Scientific computing library, used here for distance calculations 
 python-dotenv==0.19.0: Loads environment variables from a .env file for configuration management.
 nltk==3.6.2: Natural Language Toolkit for text processing tasks like tokenization.
 openai==0.27.0: Client library for interacting with OpenAI's API, used for GPT-3.5 text generation.
-   
+
+PDF Insertion
+create_clickhouse_tables: Creates the necessary tables in ClickHouse database if they don't already exist.
+ insert_pdf_summary (user_name, original_filename): Inserts a new entry into the 'abc_table' for a PDF summary, returning a unique ID.
+extract_text_from_pdf (pdf_path): Extracts text from a PDF file using OCR (Optical Character Recognition).
+ insert_chunks (summary_id, pdf_text): Breaks down the PDF text into chunks, generates embeddings, and inserts them into the 'abc_chunks' table.
+process_pdf_file (pdf_file_path, user_name): Processes a single PDF file, extracting text, creating a summary, and inserting chunks into the database.
+main: The main function that initializes the database tables and processes all PDF files in the specified directory.
+
 
 
 
