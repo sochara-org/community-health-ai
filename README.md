@@ -19,7 +19,7 @@ This project was developed by Difinative Technologies in collaboration with SOCH
      - [about.html](#abouthtml)
    - [pdf_uploading.py](#pdf_uploadingpy)
    - [pdf_downloading.py](#pdf_downloadingpy)
-5. [Requirements](#requirements
+5. [Requirements](#requirements)
 
 ## Features
 
