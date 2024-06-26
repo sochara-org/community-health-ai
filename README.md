@@ -98,7 +98,7 @@ processes a query by generating embeddings and performing a specified search met
 **process_query_clickhouse_pdf(query_text, top_n=5)**
 Processes a query by extracting important words, generating embeddings, performing a multi-stage search, and retrieving descriptions for the top PDF files. Returns the most relevant contexts, filenames, and descriptions.
 
-### search_query.py:
+### search_query.py
  **Imports**
  Brings in necessary modules and functions for the application.
  
