@@ -3,128 +3,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chatbot Interface</title>
+    <title>CHAT AI</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-image: url('https://media.istockphoto.com/id/1135638647/photo/white-lines-and-spheres.webp?b=1&s=170667a&w=0&k=20&c=KlFMDLyLj_V_AbGjSXaUxcuIb_7NN1s8cBRPYlfZqhw=');
+            background-color: #f0f0f0; /* Fallback background color */
+            background-image: url('C:\Users\deepi\Downloads\Untitled design.png'); /* Replace with your image path */
             background-size: cover;
-            background-repeat: no-repeat;
             background-position: center;
             display: flex;
             flex-direction: column;
             height: 100vh;
-            justify-content: center;
-            align-items: center;
         }
-        .chat-header {
+        .header {
             background-color: #7e57c2;
             color: #fff;
-            padding: 10px;
-            text-align: center;
-            width: 100vw;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1;
-        }
-        .header-buttons {
+            padding: 10px 20px;
             display: flex;
-            justify-content: center;
-            margin-top: 10px;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .header-button {
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            color: #ffffff;
+        }
+        .logo img {
+            height: 30px;
+            margin-right: 10px;
+        }
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+        .nav-links a {
             color: #fff;
             text-decoration: none;
             padding: 8px 16px;
             border-radius: 4px;
-            margin: 0 5px;
             background-color: transparent;
             border: 1px solid #fff;
             transition: background-color 0.3s ease;
         }
-        .header-button:hover {
+        .nav-links a:hover {
             background-color: rgba(255, 255, 255, 0.2);
         }
         .chat-container {
-            background-color: transparent;
-            width: 100%;
-            margin: 20px auto;
+            flex: 1;
             display: flex;
             flex-direction: column;
-            height: 100vh;
-            max-width: 600px;
-            border-radius: 10px;
-            padding-top: 60px;
+            max-width: 1000px;
+            width: 90%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: transparent;
+        }
+        .chat-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .chat-header img {
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
         }
         .chat-body {
-            height: calc(60vh - 160px);
+            flex: 1;
             overflow-y: auto;
             padding: 10px;
-            width: 100%;
-            margin-top: 80px;
-            margin-bottom: 80px;
-            border-radius: 0;
             background-color: transparent;
-            flex: 1;
-        }
-        .message {
-            margin-bottom: 10px;
+            border-radius: 8px;
+            margin-bottom: 80px;
         }
         .message-container {
-            width: 100%;
             display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .user-message-container {
+            justify-content: flex-end;
+        }
+        .bot-message-container {
+            justify-content: flex-start;
+        }
+        .message {
+            max-width: 70%;
             padding: 10px;
-            border-radius: 10px;
+            border-radius: 20px;
         }
         .user-message {
             background-color: #d1c4e9;
             color: #4527a0;
-            border-radius: 20px;
-            padding: 10px;
-            max-width: 50%;
-            margin-left: auto;
         }
         .bot-message {
             background-color: #b2dfdb;
             color: #00695c;
-            border-radius: 20px;
-            padding: 10px;
-            max-width: 70%;
-            margin-right: auto;
+        }
+        .bot-icon {
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+            align-self: flex-end;
         }
         .filename {
-            margin-top: 5px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 100%;
         }
-        .chat-footer {
-            background-color: #f5f5f5;
-            padding: 10px;
-            width: 100%;
+        .description {
+            font-size: 0.9em;
+            color: #666;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            max-height: 4.5em;
+            line-height: 1.5em;
+        }
+        .chat-footer-container {
             position: fixed;
             bottom: 0;
-            left: 0;
+            width: 100%;
+            background-color: #fff;
+            padding: 10px 20px;
+            box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+        }
+        .chat-footer {
             display: flex;
             justify-content: center;
             align-items: center;
         }
         .chat-footer input[type="text"] {
-            flex-grow: 1;
+            width: calc(100% - 120px);
             padding: 10px;
-            border: none;
+            margin-right: 10px;
+            border: 1px solid #ccc;
             border-radius: 4px;
-            outline: none;
         }
         .chat-footer button {
             background-color: #7e57c2;
             color: #fff;
             padding: 10px 20px;
             border: none;
-            border-radius: 20px;
+            border-radius: 4px;
             cursor: pointer;
         }
         .loading {
@@ -144,64 +173,134 @@
             border-left-color: #7e57c2;
             animation: spin 1s ease infinite;
         }
+        .file-scroll-container {
+            display: flex;
+            overflow-x: auto;
+            padding: 15px 0;
+            margin-bottom: 15px;
+            max-width: 100%;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .file-scroll-container::-webkit-scrollbar {
+            display: none; /* WebKit */
+        }
+        .file-button {
+            display: inline-block;
+            background-color: #e0e0e0;
+            color: #333;
+            border: none;
+            border-radius: 10px;
+            padding: 20px 20px; /* Increased vertical padding */
+            margin-right: 20px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            min-width: 250px;
+            max-width: 350px;
+            height: auto;
+            min-height: 50px; /* Added minimum height */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        } 
+        .file-button:hover {
+            background-color: #d1c4e9;
+        }
+        .file-button .filename {
+            font-weight: bold;
+            margin-bottom: 10px; /* Increased margin */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 100%;
+            font-size: 0.9em; /* Slightly larger font size */
+        }
+        .file-button .description {
+            font-size: 0.8em;
+            color: #666;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 4; /* Increased number of lines */
+            -webkit-box-orient: vertical;
+            max-height: 4.8em; /* Increased max height */
+            line-height: 1.2;
+        }
         @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-            100% {
-                transform: rotate(360deg);
-            }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <div class="chat-container">
+    <div class="header">
+        <div class="logo">
+            <div class="logo" style="font-weight: bold; font-size: 24px;"></div>
+            <img src="https://cdn.dribbble.com/userupload/11844878/file/original-e172e96140d89ad3a11c70da24b9c022.png?crop=0x211-1080x1021&resize=400x300&vertical=center" alt="CHAT AI Logo">
+            CHAT AI
+        </div>
+        <div class="nav-links">
+            <a href="/">Ask your question</a>
+            <a href="/about">About us</a>
+            <a href="https://www.sochara.org/" target="_blank">Donate</a>
+        </div>
+    </div>
+    
+    <div class="chat-container"> 
         <div class="chat-header">
-            <h2>Chatbot Interface</h2>
-            <div class="header-buttons">
-                <a href="/about" class="header-button">About Us</a>
-                <a href="/" class="header-button">Ask Your Question</a>
-                <a href="https://www.sochara.org/" class="header-button" target="_blank">Donate</a>
-            </div>
+            <img src="https://cdn.dribbble.com/userupload/11844878/file/original-e172e96140d89ad3a11c70da24b9c022.png?crop=0x211-1080x1021&resize=400x300&vertical=center" alt="AI Icon">
+            <span>CHAT AI</span>
         </div>
         <div class="chat-body" id="chat-body">
-            <!-- Loop through conversation_history and display messages -->
+            <!-- Conversation history will be inserted here -->
             {% for entry in conversation_history %}
-                <div class="message user-message">{{ entry[0] }}</div>  <!-- Access the query_text -->
-                <div class="message bot-message">{{ entry[1] }}</div>
+                <div class="message-container user-message-container">
+                    <div class="message user-message">{{ entry[0] }}</div>
+                </div>
+                <div class="message-container bot-message-container">
+                    <img src="https://cdn.dribbble.com/userupload/11844878/file/original-e172e96140d89ad3a11c70da24b9c022.png?crop=0x211-1080x1021&resize=400x300&vertical=center" alt="AI Icon" class="bot-icon">
+                    <div class="message bot-message">{{ entry[1] }}</div>
+                </div>
                 {% if entry[2] and entry[3] %}
-                    {% for pdf_url, pdf_description in zip(entry[2], entry[3]) %}
-                        <div class="message filename">
-                            <a href="{{ pdf_url }}" target="_blank">{{ pdf_url }}</a>
-                            <p>Description: {{ pdf_description }}</p>
-                        </div>
-                    {% endfor %}
+                    <div class="file-scroll-container">
+                        {% for pdf_url, pdf_description in zip(entry[2], entry[3]) %}
+                            <a href="{{ pdf_url }}" target="_blank" class="file file-button">
+                                <div class="filename">{{ pdf_url.split('/')[-1] }}</div>
+                                {% if pdf_description %}
+                                    <div class="description">{{ pdf_description }}</div>
+                                {% endif %}
+                            </a>        
+                        {% endfor %}
+                    </div>
                 {% endif %}
             {% endfor %}
         </div>
+    </div>
+    
+    <div class="chat-footer-container">
         <div class="chat-footer">
-            <!-- Form for user input -->
             <form id="chat-form">
-                <input type="text" id="query" name="query" placeholder="Type your message..." required>
+                <input type="text" id="query" name="query" placeholder="Ask your question" required>
                 <button type="submit" id="send-btn">Send</button>
             </form>
         </div>
     </div>
+    
     <div class="loading" id="loading">
         <div class="spinner"></div>
     </div>
-    <!-- JavaScript for scrolling to the bottom of the chat body and handling form submission -->
+
     <script>
         var chatBody = document.getElementById('chat-body');
-        chatBody.scrollTop = chatBody.scrollHeight; // Scroll to the bottom of the chat body
+        chatBody.scrollTop = chatBody.scrollHeight;
 
         document.getElementById("chat-form").addEventListener("submit", function(event) {
-            event.preventDefault();// Prevent the default form submission
+            event.preventDefault();
 
             var query = document.getElementById("query").value;
             var loading = document.getElementById("loading");
 
-            // Show loading animation
             loading.style.display = "block";
 
             var xhr = new XMLHttpRequest();
@@ -213,41 +312,58 @@
                     loading.style.display = "none";
 
                     if (xhr.status === 200) {
-                        // Parse the response and update the chat body
                         var response = JSON.parse(xhr.responseText);
+                        
+                        var userMessageContainer = document.createElement("div");
+                        userMessageContainer.className = "message-container user-message-container";
                         var userMessage = document.createElement("div");
                         userMessage.className = "message user-message";
                         userMessage.textContent = query;
-                        chatBody.appendChild(userMessage);
+                        userMessageContainer.appendChild(userMessage);
+                        chatBody.appendChild(userMessageContainer);
 
+                        var botMessageContainer = document.createElement("div");
+                        botMessageContainer.className = "message-container bot-message-container";
+                        var botIcon = document.createElement("img");
+                        botIcon.src = "https://cdn.dribbble.com/userupload/11844878/file/original-e172e96140d89ad3a11c70da24b9c022.png?crop=0x211-1080x1021&resize=400x300&vertical=center";
+                        botIcon.alt = "AI Icon";
+                        botIcon.className = "bot-icon";
+                        botMessageContainer.appendChild(botIcon);
                         var botMessage = document.createElement("div");
                         botMessage.className = "message bot-message";
                         botMessage.textContent = response.bot_reply;
-                        chatBody.appendChild(botMessage);
+                        botMessageContainer.appendChild(botMessage);
+                        chatBody.appendChild(botMessageContainer);
 
                         if (response.pdf_urls && response.pdf_urls.length > 0) {
+                            var fileScrollContainer = document.createElement("div");
+                            fileScrollContainer.className = "file-scroll-container";
+
                             response.pdf_urls.forEach(function(pdf_url, index) {
-                                var pdfContainer = document.createElement("div");
-                                pdfContainer.className = "message filename";
-                                
-                                var link = document.createElement("a");
-                                link.href = pdf_url;
-                                link.target = "_blank";
-                                link.textContent = pdf_url;
-                                pdfContainer.appendChild(link);
-                                
+                                var fileButton = document.createElement("a");
+                                fileButton.href = pdf_url;
+                                fileButton.target = "_blank";
+                                fileButton.className = "file file-button";
+
+                                var fileName = document.createElement("div");
+                                fileName.className = "filename";
+                                fileName.textContent = pdf_url.split('/').pop();
+                                fileButton.appendChild(fileName);
+
                                 if (response.pdf_descriptions && response.pdf_descriptions[index]) {
-                                    var description = document.createElement("p");
-                                    description.textContent = "Description: " + response.pdf_descriptions[index];
-                                    pdfContainer.appendChild(description);
+                                    var description = document.createElement("div");
+                                    description.className = "description";
+                                    description.textContent = response.pdf_descriptions[index];
+                                    fileButton.appendChild(description);
                                 }
 
-                                chatBody.appendChild(pdfContainer);
+                                fileScrollContainer.appendChild(fileButton);
                             });
 
+                            chatBody.appendChild(fileScrollContainer);
                         }
 
-                        chatBody.scrollTop = chatBody.scrollHeight; // Scroll to the bottom of the chat body
+                        chatBody.scrollTop = chatBody.scrollHeight;
                     } else {
                         console.error("Error: " + xhr.status);
                     }
@@ -255,7 +371,7 @@
             };
 
             xhr.send("query=" + encodeURIComponent(query));
-            document.getElementById("query").value = ""; // Clear the input field
+            document.getElementById("query").value = "";
         });
     </script>
 </body>
