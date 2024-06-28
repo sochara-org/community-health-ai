@@ -79,6 +79,11 @@
             background-color: transparent;
             border-radius: 8px;
             margin-bottom: 80px;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none;
+        }
+        .chat-body::-webkit-scrollbar {
+            display: none; /* Safari and Chrome */
         }
         .message-container {
             display: flex;
@@ -86,6 +91,7 @@
         }
         .user-message-container {
             justify-content: flex-end;
+            flex-direction: row-reverse;
         }
         .bot-message-container {
             justify-content: flex-start;
@@ -103,11 +109,15 @@
             background-color: #b2dfdb;
             color: #00695c;
         }
-        .bot-icon {
+        .bot-icon, .user-icon {
             width: 30px;
             height: 30px;
             margin-right: 10px;
             align-self: flex-end;
+        }
+        .user-icon {
+            margin-left: 10px;
+            margin-right: 0;
         }
         .chat-footer-container {
             position: fixed;
@@ -137,21 +147,6 @@
             border-radius: 4px;
             cursor: pointer;
         }
-        .file-scroll-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            padding: 15px 0;
-            margin-bottom: 15px;
-            max-width: 100%;
-            overflow-y: auto;
-            max-height: 300px;
-            scrollbar-width: none;  /* For Firefox */
-            -ms-overflow-style: none;  /* For Internet Explorer and Edge */
-        }
-        .file-scroll-container::-webkit-scrollbar {
-            display: none;  /* For Chrome, Safari, and Opera */
-        }
         .file-button {
             display: flex;
             flex-direction: column;
@@ -163,8 +158,9 @@
             text-decoration: none;
             cursor: pointer;
             transition: background-color 0.3s ease;
-            width: 100%;
+            width: 80%;
             position: relative;
+            margin-top: 10px;
         }
         .file-button:hover {
             background-color: #d1c4e9;
@@ -247,6 +243,7 @@
             {% for entry in conversation_history %}
                 <div class="message-container user-message-container">
                     <div class="message user-message">{{ entry[0] }}</div>
+                    <img src="https://cdn-icons-png.flaticon.com/512/9187/9187604.png" alt="User Icon" class="user-icon">
                 </div>
                 <div class="message-container bot-message-container">
                     <img src="https://cdn.dribbble.com/userupload/11844878/file/original-e172e96140d89ad3a11c70da24b9c022.png?crop=0x211-1080x1021&resize=400x300&vertical=center" alt="AI Icon" class="bot-icon">
@@ -294,7 +291,12 @@
             var userMessage = document.createElement("div");
             userMessage.className = "message user-message";
             userMessage.textContent = query;
+            var userIcon = document.createElement("img");
+            userIcon.src = "https://cdn-icons-png.flaticon.com/512/9187/9187604.png";
+            userIcon.alt = "User Icon";
+            userIcon.className = "user-icon";
             userMessageContainer.appendChild(userMessage);
+            userMessageContainer.appendChild(userIcon);
             chatBody.appendChild(userMessageContainer);
 
             // Scroll to the user message
