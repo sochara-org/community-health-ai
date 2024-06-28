@@ -15,15 +15,16 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+
 load_dotenv()
 archive_base_url = os.getenv('ARCHIVE_BASE_URL')
 
-print("Current Working Directory:", os.getcwd())
+
 
 if 'OPENAI_API_KEY' in os.environ:
     del os.environ['OPENAI_API_KEY']
 
-dotenv_path = 'a.env'
+dotenv_path = '.env'
 
 if not os.path.exists(dotenv_path):
     raise FileNotFoundError(f"The .env file at path '{dotenv_path}' does not exist.")
@@ -84,29 +85,23 @@ def get_surrounding_chunks(client, id, summary_id, window_size=2):
     return full_context
 
 def get_original_filename(client, summary_id):
-    # Execute the query to get the original filename
-    query = f"SELECT original_filename FROM abc_table WHERE id = '{summary_id}'"
-    result = client.execute(query)
+    try:
+        query = f"SELECT original_filename FROM abc_table WHERE id = '{summary_id}'"
+        result = client.execute(query)
+        if result:
+            original_filename = result[0][0]
+            original_filename = original_filename.split('None', 1)[-1].strip()
+            filename_without_ext = os.path.splitext(original_filename)[0]
+            parsed_url = urllib.parse.urlparse(filename_without_ext)
+            filename = parsed_url.path.split('/')[-1]
+            file_url = f"{archive_base_url}{filename}"
+            return file_url
+        else:
+            return get_random_filename(client)
+    except Exception as e:
+        print("An error occurred while fetching the original filename:", e)
+        return get_random_filename(client)
 
-    if result:
-        original_filename = result[0][0]
-
-        # Process the filename to remove 'None' prefix and strip whitespace
-        original_filename = original_filename.split('None', 1)[-1].strip()
-
-        # Extract the filename without the extension
-        filename_without_ext = os.path.splitext(original_filename)[0]
-
-        # Parse the URL to extract the filename
-        parsed_url = urllib.parse.urlparse(filename_without_ext)
-        filename = parsed_url.path.split('/')[-1]
-
-        # Construct the full file URL
-        file_url = f"{archive_base_url}{filename}"
-
-        return file_url
-
-    return None
 
 
 def cosine_similarity(client, question_embedding):
@@ -309,25 +304,52 @@ def get_pdf_description(filename):
     except Exception as e:
         logger.error(f"Error querying ClickHouse: {e}")
         return "Error retrieving description."
+    
 
+def get_random_filename(client):
+    try:
+        query = "SELECT original_filename FROM abc_table ORDER BY rand() LIMIT 1"
+        result = client.execute(query)
+        if result:
+            original_filename = result[0][0]
+            original_filename = original_filename.split('None', 1)[-1].strip()
+            filename_without_ext = os.path.splitext(original_filename)[0]
+            parsed_url = urllib.parse.urlparse(filename_without_ext)
+            filename = parsed_url.path.split('/')[-1]
+            file_url = f"{archive_base_url}{filename}"
+            return file_url
+        return None
+    except Exception as e:
+        print("An error occurred while fetching a random filename:", e)
+        return None
 
-def deduplicate_results(closest_chunks, top_n):
+def deduplicate_results(client, closest_chunks, top_n=5):
+    if not closest_chunks:
+        return ["No content available"] * top_n, ["No file available"] * top_n
+
     full_contexts = []
     pdf_filenames = []
     seen_filenames = set()
 
     for chunk in closest_chunks:
-        if len(chunk) >= 2:
-            full_context, file_url = chunk
-            if file_url not in seen_filenames:
-                full_contexts.append(full_context)
-                pdf_filenames.append(file_url)
-                seen_filenames.add(file_url)
+        if len(full_contexts) >= top_n:
+            break
+        full_context, file_url = chunk
+        if file_url not in seen_filenames:
+            full_contexts.append(full_context)
+            pdf_filenames.append(file_url)
+            seen_filenames.add(file_url)
 
-            if len(seen_filenames) == top_n:
-                break  # Stop after getting top_n unique filenames
+    while len(pdf_filenames) < top_n:
+        random_filename = get_random_filename(client)
+        if random_filename and random_filename not in seen_filenames:
+            full_contexts.append("No additional unique content available")
+            pdf_filenames.append(random_filename)
+            seen_filenames.add(random_filename)
 
-    return full_contexts, pdf_filenames
+    return full_contexts[:top_n], pdf_filenames[:top_n]
+
+
 
 def structure_sentence_with_llama(query, chunk_text, llama_tokenizer, llama_model):
     try:
@@ -411,42 +433,53 @@ def process_query_clickhouse(query_text, search_method='ann_search'):
 
 # Add debug prints and exception handling
 
-
 def process_query_clickhouse_pdf(query_text, top_n=5):
     try:
-        # Initialize tokenizer, model, and ClickHouse client
         tokenizer, model = initialize_tokenizer_and_model()
         client = initialize_clickhouse_connection()
 
-        # Extract important words from the query text
         important_words = extract_important_words(query_text)
 
         if important_words:
-            # Generate query embeddings from the query text
             query_embedding = generate_embeddings(tokenizer, model, query_text)
-            # Perform multi-stage query to find closest chunks
-            closest_chunks, _ = query_clickhouse_word_with_multi_stage(client, important_words, query_embedding, top_n)
+            closest_chunks, _ = query_clickhouse_word_with_multi_stage(client, important_words, query_embedding, top_n=20)
             
             if closest_chunks:
-                # Deduplicate the results
-                full_contexts, pdf_filenames = deduplicate_results(closest_chunks, top_n)
+                full_contexts, pdf_filenames = deduplicate_results(client, closest_chunks, top_n=5)
 
-                # Retrieve descriptions for unique PDF files
+                # Ensure uniqueness of pdf_filenames
+                unique_filenames = list(dict.fromkeys(pdf_filenames))
+                
+                # If we don't have enough unique filenames, add random ones
+                while len(unique_filenames) < top_n:
+                    random_filename = get_random_filename(client)
+                    if random_filename and random_filename not in unique_filenames:
+                        unique_filenames.append(random_filename)
+
                 pdf_descriptions = []
-                for filename in pdf_filenames:
-                    description = get_pdf_description(filename)
-                    pdf_descriptions.append(description)
+                for filename in unique_filenames:
+                    if "No additional unique file" in filename:
+                        pdf_descriptions.append("No additional unique description available")
+                    else:
+                        description = get_pdf_description(filename)
+                        pdf_descriptions.append(description)
 
-                return full_contexts, pdf_filenames, pdf_descriptions
+                # Ensure we have exactly top_n results
+                full_contexts = full_contexts[:top_n]
+                unique_filenames = unique_filenames[:top_n]
+                pdf_descriptions = pdf_descriptions[:top_n]
+
+                return full_contexts, unique_filenames, pdf_descriptions
             else:
-                # Handle case where no closest_chunks were found
-                print("No closest_chunks found")
-                return None, [], []  # Return empty lists for all results
+                print("No closest_chunks found, returning placeholders")
+                placeholder = "No content available"
+                placeholder_file = "No file available"
+                placeholder_desc = "No description available"
+                return [placeholder]*top_n, [placeholder_file]*top_n, [placeholder_desc]*top_n
 
-        # Handle case where no important words were extracted
-        return None, [], []
+        return ["No content available"]*top_n, ["No file available"]*top_n, ["No description available"]*top_n
 
     except Exception as e:
-        # Log the error using the logger
         logger.error(f"Error in process_query_clickhouse_pdf: {str(e)}")
-        return None, [], []  # Return default values or handle as needed
+        placeholder = "Error occurred"
+        return [placeholder]*top_n, [placeholder]*top_n, [placeholder]*top_n
