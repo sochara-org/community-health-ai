@@ -14,12 +14,8 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-
-
 load_dotenv()
 archive_base_url = os.getenv('ARCHIVE_BASE_URL')
-
-
 
 if 'OPENAI_API_KEY' in os.environ:
     del os.environ['OPENAI_API_KEY']
@@ -47,11 +43,6 @@ def initialize_tokenizer_and_model():
         tokenizer.pad_token = tokenizer.eos_token or "[PAD]"
     return tokenizer, model
 
-def initialize_llama_model():
-    llama_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-hf")
-    llama_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-hf")
-    return llama_tokenizer, llama_model
-
 def generate_embeddings(tokenizer, model, query):
     try:
         inputs = tokenizer(query, return_tensors="pt", padding=True, truncation=True)
@@ -62,14 +53,13 @@ def generate_embeddings(tokenizer, model, query):
         pooled_embedding = pooled_embedding.squeeze().numpy().tolist()
         return pooled_embedding
     except Exception as e:
-        print("An error occurred while converting query to embeddings:", e)
+        logger.error(f"Error generating embeddings: {e}")
         return None
-    
+
 def extract_important_words(query_text):
     words = re.findall(r'\b\w+\b', query_text.lower())
     important_words = [word for word in words if word not in stop_words]
     return important_words
-
 
 def get_surrounding_chunks(client, id, summary_id, window_size=2):
     surrounding_chunks_query = f"""
@@ -99,10 +89,8 @@ def get_original_filename(client, summary_id):
         else:
             return get_random_filename(client)
     except Exception as e:
-        print("An error occurred while fetching the original filename:", e)
+        logger.error(f"Error fetching original filename: {e}")
         return get_random_filename(client)
-
-
 
 def cosine_similarity(client, question_embedding):
     try:
@@ -118,13 +106,13 @@ def cosine_similarity(client, question_embedding):
         """
         sections = client.execute(query)
         if not sections:
-            print("No sections retrieved from the database.")
+            logger.info("No sections retrieved from the database.")
             return None, None
         chunk_text, summary_id = sections[0][:2]
         original_filename = get_original_filename(client, summary_id)
         return chunk_text, original_filename
     except Exception as e:
-        print("An error occurred during vector search in chunks:", e)
+        logger.error(f"Error in cosine similarity search: {e}")
         return None, None
 
 def vector_search_cosine_distance(client, question_embedding):
@@ -142,24 +130,23 @@ def vector_search_cosine_distance(client, question_embedding):
         """
         sections = client.execute(query)
         if not sections:
-            print("No sections retrieved from the database.")
+            logger.info("No sections retrieved from the database.")
             return None, None
         chunk_text, summary_id = sections[0][:2]
         original_filename = get_original_filename(client, summary_id)
         return chunk_text, original_filename
     except Exception as e:
-        print("An error occurred during vector search in chunks:", e)
+        logger.error(f"Error in vector search cosine distance: {e}")
         return None, None
 
 def ann_search(client, query_embedding, window_size=2, top_n=5):
     try:
         question_embedding_str = ','.join(map(str, query_embedding))
         query = f"""
-
         SELECT c.id, c.chunk_text, c.summary_id,
                (dotProduct(c.embeddings, [{question_embedding_str}]) /
                (sqrt(dotProduct(c.embeddings, c.embeddings)) * sqrt(dotProduct([{question_embedding_str}], [{question_embedding_str}])))
-               ) AS cosine_similarity
+                ) AS cosine_similarity
         FROM abc_chunks AS c
         JOIN abc_table AS a ON c.summary_id = a.id
         ORDER BY cosine_similarity DESC
@@ -167,11 +154,11 @@ def ann_search(client, query_embedding, window_size=2, top_n=5):
         """
         sections = client.execute(query)
         if not sections:
-            print("No sections retrieved from the database.")
+            logger.info("No sections retrieved from the database.")
             return None, None
 
         chunks = []
-        pdf_filenames = []  # Collect PDF filenames for description retrieval
+        pdf_filenames = []
         for section in sections:
             id, chunk_text, summary_id, cosine_similarity = section
             full_context = get_surrounding_chunks(client, id, summary_id, window_size)
@@ -180,18 +167,12 @@ def ann_search(client, query_embedding, window_size=2, top_n=5):
             if file_url and file_url.endswith('.pdf'):
                 pdf_filenames.append(file_url)
 
-        # Retrieve descriptions for top PDF files
-        pdf_descriptions = []
-        for filename in pdf_filenames[:top_n]:
-            description = get_pdf_description(filename)
-            pdf_descriptions.append(description)
-
+        pdf_descriptions = [get_pdf_description(client, filename) for filename in pdf_filenames[:top_n]]
         return chunks, pdf_descriptions
 
     except Exception as e:
-        print("An error occurred during vector search in chunks:", e)
+        logger.error(f"Error in ANN search: {e}")
         return None, None
-
 
 def euclidean_search(client, question_embedding):
     try:
@@ -206,15 +187,14 @@ def euclidean_search(client, question_embedding):
         """
         sections = client.execute(query)
         if not sections:
-            print("No sections retrieved from the database.")
+            logger.info("No sections retrieved from the database.")
             return None, None
         chunk_text, summary_id = sections[0][:2]
         original_filename = get_original_filename(client, summary_id)
         return chunk_text, original_filename
     except Exception as e:
-        print("An error occurred during vector search in chunks:", e)
+        logger.error(f"Error in Euclidean search: {e}")
         return None, None
-    
 
 def query_clickhouse_word_with_multi_stage(client, important_words, query_embedding, top_n=5):
     query_embedding_str = ','.join(map(str, query_embedding))
@@ -265,7 +245,6 @@ def query_clickhouse_word_with_multi_stage(client, important_words, query_embedd
 
     # Fallback to ANN search if no relevant chunks found
     return ann_search(client, query_embedding, top_n=top_n)
- 
 
 def get_pdf_description(filename):
     try:
@@ -362,31 +341,26 @@ def structure_sentence_with_llama(query, chunk_text, llama_tokenizer, llama_mode
         print(f"An error occurred: {e}")
         return None
     
-
-
-
-def structure_chunk_text(query, chunk_text):
+def get_structured_answer(query, chunk_text):
     try:
         messages = [
-            {"role": "system", "content": "Just format the text without adding any changes and removing any text"},
-            {"role": "user", "content": f"Please structure the following text:\n\n{chunk_text}"}
+            {"role": "system", "content": "You are a helpful assistant. Your task is to find the most relevant information in the provided text to answer the user's query. Provide a concise and structured answer. But you shouldn't let them know that the text was provided to you. You should make it in such a way that the text was written by you. "},
+            {"role": "user", "content": f"Query: {query}\n\nContext: {chunk_text}\n\nPlease provide a structured and concise answer to the query based on the given context."}
         ]
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=messages,
-            max_tokens=1000,  # Increase max_tokens if you expect longer outputs
-            temperature=0.01,
+            max_tokens=300,
+            temperature=0.7,
             top_p=1.0,
             frequency_penalty=0.0,
-            presence_penalty=0.0,
-            stop=None
+            presence_penalty=0.0
         )
-        completion_text = response.choices[0].message.content
-        return completion_text.strip()
+        structured_answer = response.choices[0].message.content
+        return structured_answer.strip()
     except Exception as e:
-        print(f"An error occurred: {e}")
-        return None
-
+        logger.error(f"Error in get_structured_answer: {str(e)}")
+        return "I'm sorry, There seems to be no relevant answer for your question."
 
 def process_query_clickhouse(query_text, search_method='ann_search'):
     tokenizer, model = initialize_tokenizer_and_model()
@@ -423,9 +397,18 @@ def process_query_clickhouse_pdf(query_text, top_n=5):
         if important_words:
             query_embedding = generate_embeddings(tokenizer, model, query_text)
             closest_chunks, _ = query_clickhouse_word_with_multi_stage(client, important_words, query_embedding, top_n=20)
-            
+            #closest_chunks, _ = ann_search(client, query_embedding, top_n=20)
+
             if closest_chunks:
-                full_contexts, pdf_filenames = deduplicate_results(client, closest_chunks, top_n=5)
+                # Call get_structured_answer for each chunk
+                structured_chunks = []
+                for chunk, file_url in closest_chunks:
+                    structured_answer = get_structured_answer(query_text, chunk)
+                    structured_chunks.append((structured_answer, file_url))
+
+            #if closest_chunks:
+                #full_contexts, pdf_filenames = deduplicate_results(client, closest_chunks, top_n=5)
+                full_contexts, pdf_filenames = deduplicate_results(client, structured_chunks, top_n=5)
 
                 # Ensure uniqueness of pdf_filenames
                 unique_filenames = list(dict.fromkeys(pdf_filenames))
