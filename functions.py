@@ -131,54 +131,6 @@ def get_original_filename(client, summary_id):
         logger.error(f"Error fetching original filename: {e}")
         return None
 
-@timeit
-def cosine_similarity(client, question_embedding):
-    try:
-        question_embedding_str = ','.join(map(str, question_embedding))
-        query = f"""
-        SELECT chunk_text, summary_id,
-               (dotProduct(embeddings, [{question_embedding_str}]) / 
-                (sqrt(dotProduct(embeddings, embeddings)) * sqrt(dotProduct([{question_embedding_str}], [{question_embedding_str}]))) ) AS cosine_similarity
-        FROM b_chunks
-        JOIN b_table ON b_chunks.summary_id = b_table.id
-        ORDER BY cosine_similarity DESC
-        LIMIT 1
-        """
-        sections = client.execute(query)
-        if not sections:
-            logger.info("No sections retrieved from the database.")
-            return None, None
-        chunk_text, summary_id = sections[0][:2]
-        original_filename = get_original_filename(client, summary_id)
-        return chunk_text, original_filename
-    except Exception as e:
-        logger.error(f"Error in cosine similarity search: {e}")
-        return None, None
-
-@timeit
-def vector_search_cosine_distance(client, question_embedding):
-    try:
-        question_embedding_str = ','.join(map(str, question_embedding))
-        query = f"""
-        SELECT chunk_text, summary_id,
-               1 - (dotProduct(embeddings, [{question_embedding_str}]) / 
-                    (sqrt(dotProduct(embeddings, embeddings)) * sqrt(dotProduct([{question_embedding_str}], [{question_embedding_str}])))
-               ) AS cosine_distance
-        FROM b_chunks
-        JOIN b_table ON b_chunks.summary_id = b_table.id
-        ORDER BY cosine_distance ASC
-        LIMIT 1
-        """
-        sections = client.execute(query)
-        if not sections:
-            logger.info("No sections retrieved from the database.")
-            return None, None
-        chunk_text, summary_id = sections[0][:2]
-        original_filename = get_original_filename(client, summary_id)
-        return chunk_text, original_filename
-    except Exception as e:
-        logger.error(f"Error in vector search cosine distance: {e}")
-        return None, None
 
 @timeit
 def ann_search(client, query_embedding, window_size=2, top_n=5):
@@ -219,29 +171,6 @@ def ann_search(client, query_embedding, window_size=2, top_n=5):
         logger.error(f"Error in ANN search: {e}")
         return None, None
     
-
-@timeit
-def euclidean_search(client, question_embedding):
-    try:
-        question_embedding_str = ','.join(map(str, question_embedding))
-        query = f"""
-        SELECT chunk_text, summary_id,
-               LpDistance(embeddings, [{question_embedding_str}], 2) AS euclidean_distance
-        FROM b_chunks
-        JOIN b_table ON b_chunks.summary_id = b_table.id
-        ORDER BY euclidean_distance ASC
-        LIMIT 1
-        """
-        sections = client.execute(query)
-        if not sections:
-            logger.info("No sections retrieved from the database.")
-            return None, None
-        chunk_text, summary_id = sections[0][:2]
-        original_filename = get_original_filename(client, summary_id)
-        return chunk_text, original_filename
-    except Exception as e:
-        logger.error(f"Error in Euclidean search: {e}")
-        return None, None
 
 @timeit
 def query_clickhouse_word_with_multi_stage(client, important_words, query_embedding, top_n=5):
@@ -413,30 +342,6 @@ def get_structured_answer(query, chunk_text):
     except Exception as e:
         logger.error(f"Error in get_structured_answer: {str(e)}")
         return "I'm sorry, There seems to be no relevant answer for your question."
-
-@timeit
-def process_query_clickhouse(query_text, search_method='ann_search'):
-    tokenizer, model = get_tokenizer_and_model()
-    client = initialize_clickhouse_connection()
-    question_embedding = generate_embeddings(tokenizer, model, query_text)
-
-    if question_embedding is not None:
-
-        search_methods = {
-            'cosine_similarity': cosine_similarity,
-            'vector_search_cosine_distance': vector_search_cosine_distance,
-            'ann_search': ann_search,
-            'euclidean_search': euclidean_search
-        }
-
-        if search_method in search_methods:
-            search_function = search_methods[search_method]
-            chunk_text, pdf_filename = search_function(client, question_embedding)
-            if chunk_text and pdf_filename:
-                return chunk_text, pdf_filename
-        else:
-            print(f"Search method '{search_method}' is not valid.")
-    return None, None
 
 # Add debug prints and exception handling
 @timeit
