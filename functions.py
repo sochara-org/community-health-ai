@@ -133,7 +133,7 @@ def get_original_filename(client, summary_id):
 
 
 @timeit
-def ann_search(client, query_embedding, window_size=2, top_n=5):
+def ann_search(client, query_embedding, window_size=2, top_n=1):
     try:
         question_embedding_str = ','.join(map(str, query_embedding))
         query = f"""
@@ -173,7 +173,7 @@ def ann_search(client, query_embedding, window_size=2, top_n=5):
     
 
 @timeit
-def query_clickhouse_word_with_multi_stage(client, important_words, query_embedding, top_n=5):
+def query_clickhouse_word_with_multi_stage(client, important_words, query_embedding, top_n=1):
     query_embedding_str = ','.join(map(str, query_embedding))
 
     # Stage 1: Retrieve potentially relevant chunks based on keyword matching
@@ -351,21 +351,18 @@ def process_query_clickhouse_pdf(query_text, top_n=5):
         client = initialize_clickhouse_connection()
 
         important_words = extract_important_words(query_text)
-
         if important_words:
             query_embedding = generate_embeddings(tokenizer, model, query_text)
-            closest_chunks, _ = query_clickhouse_word_with_multi_stage(client, important_words, query_embedding, top_n=20)
-            #closest_chunks, _ = ann_search(client, query_embedding, top_n=20)
+            closest_chunks, _ = query_clickhouse_word_with_multi_stage(client, important_words, query_embedding, top_n=1)
 
             if closest_chunks:
-                # Call get_structured_answer for each chunk
+                # Combine contexts for structured answer
                 combined_context = " ".join([chunk for chunk, _ in closest_chunks])
                 structured_answer = get_structured_answer(query_text, combined_context)
-
+                
+                # Use the structured answer as the only relevant chunk for further processing
                 structured_chunks = [(structured_answer, closest_chunks[0][1])]
-
-            #if closest_chunks:
-                #full_contexts, pdf_filenames = deduplicate_results(client, closest_chunks, top_n=5)
+                
                 full_contexts, pdf_filenames = deduplicate_results(client, structured_chunks, top_n=5)
 
                 # Ensure uniqueness of pdf_filenames
