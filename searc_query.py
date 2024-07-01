@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 logging.basicConfig(level=logging.INFO)
 
-warnings.filterwarnings("ignore", category=FutureWarning, message="`resume_download` is deprecated*")
+warnings.filterwarnings("ignore", category=FutureWarning, message="resume_download is deprecated*")
 conversation_history = []
 
 @app.route('/', methods=['GET', 'POST'])
@@ -18,26 +18,25 @@ def index():
             return jsonify({"bot_reply": "Please enter a valid query."}), 400
 
         try:
-            structured_sentences, pdf_filenames, pdf_descriptions = functions.process_query_clickhouse_pdf(query_text)
+            structured_answers, pdf_filenames, pdf_descriptions = functions.process_query_clickhouse_pdf(query_text)
         except Exception as e:
             return jsonify({"bot_reply": f"An error occurred: {str(e)}"}), 500
 
-        if not structured_sentences:
-            structured_sentence = "I'm sorry, I couldn't find a relevant response for your query."
+        if not structured_answers:
+            structured_answer = "I'm sorry, I couldn't find a relevant response for your query."
             pdf_filenames = []
             pdf_descriptions = []
         else:
-            structured_sentence = structured_sentences[0]
+            structured_answer = structured_answers[0]
 
-        print("PDF Descriptions:", pdf_descriptions)
-        conversation_history.append((query_text, structured_sentence, pdf_filenames, pdf_descriptions))
+        conversation_history.append((query_text, structured_answer, pdf_filenames, pdf_descriptions))
         return jsonify({
-            "bot_reply": structured_sentence, 
-            "pdf_urls": pdf_filenames, 
+            "bot_reply": structured_answer,
+            "pdf_urls": pdf_filenames,
             "pdf_descriptions": pdf_descriptions
         })
 
-    return render_template('index.html',zip=zip, conversation_history=conversation_history)
+    return render_template('index.html', zip=zip, conversation_history=conversation_history)
 
 
 @app.route('/about')
