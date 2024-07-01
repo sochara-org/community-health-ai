@@ -75,10 +75,6 @@
         .chat-body {
             flex: 1;
             overflow-y: auto;
-<<<<<<< HEAD
-            
-=======
->>>>>>> 11ed926ec9e8589e328303385b48841ed8a33f82
             padding: 10px;
             background-color: transparent;
             border-radius: 8px;
@@ -87,11 +83,7 @@
             -ms-overflow-style: none;
         }
         .chat-body::-webkit-scrollbar {
-<<<<<<< HEAD
-            display: none; /* Safari and Chrome */
-=======
             display: none; /* Safari and Chrome */
->>>>>>> 11ed926ec9e8589e328303385b48841ed8a33f82
         }
         .message-container {
             display: flex;
@@ -99,10 +91,7 @@
         }
         .user-message-container {
             justify-content: flex-end;
-<<<<<<< HEAD
-=======
             flex-direction: row-reverse;
->>>>>>> 11ed926ec9e8589e328303385b48841ed8a33f82
         }
         .bot-message-container {
             justify-content: flex-start;
@@ -120,23 +109,16 @@
             background-color: #b2dfdb;
             color: #00695c;
         }
-<<<<<<< HEAD
-        .bot-icon {
-=======
         .bot-icon, .user-icon {
->>>>>>> 11ed926ec9e8589e328303385b48841ed8a33f82
             width: 30px;
             height: 30px;
             margin-right: 10px;
             align-self: flex-end;
         }
-<<<<<<< HEAD
-=======
         .user-icon {
             margin-left: 10px;
             margin-right: 0;
         }
->>>>>>> 11ed926ec9e8589e328303385b48841ed8a33f82
         .chat-footer-container {
             position: fixed;
             bottom: 0;
@@ -261,10 +243,7 @@
             {% for entry in conversation_history %}
                 <div class="message-container user-message-container">
                     <div class="message user-message">{{ entry[0] }}</div>
-<<<<<<< HEAD
-=======
-                    <img src="https://cdn-icons-png.flaticon.com/512/9187/9187604.png" alt="User Icon" class="user-icon">
->>>>>>> 11ed926ec9e8589e328303385b48841ed8a33f82
+                    <img src="https://icons.veryicon.com/png/o/miscellaneous/two-color-icon-library/user-286.png" alt="User Icon" class="user-icon">
                 </div>
                 <div class="message-container bot-message-container">
                     <img src="https://cdn.dribbble.com/userupload/11844878/file/original-e172e96140d89ad3a11c70da24b9c022.png?crop=0x211-1080x1021&resize=400x300&vertical=center" alt="AI Icon" class="bot-icon">
@@ -312,16 +291,12 @@
             var userMessage = document.createElement("div");
             userMessage.className = "message user-message";
             userMessage.textContent = query;
-<<<<<<< HEAD
-            userMessageContainer.appendChild(userMessage);
-=======
             var userIcon = document.createElement("img");
-            userIcon.src = "https://cdn-icons-png.flaticon.com/512/9187/9187604.png";
+            userIcon.src = "https://icons.veryicon.com/png/o/miscellaneous/two-color-icon-library/user-286.png";
             userIcon.alt = "User Icon";
             userIcon.className = "user-icon";
             userMessageContainer.appendChild(userMessage);
             userMessageContainer.appendChild(userIcon);
->>>>>>> 11ed926ec9e8589e328303385b48841ed8a33f82
             chatBody.appendChild(userMessageContainer);
 
             // Scroll to the user message

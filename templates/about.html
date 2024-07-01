@@ -2,65 +2,88 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>About Us</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - CHAT AI AI</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
+            background-color: #f0f0f0;
         }
-        h1 {
-            color: #7e57c2;
-        }
-        .chat-header {
+        .header {
             background-color: #7e57c2;
             color: #fff;
-            padding: 10px;
-            text-align: center;
-            width: 100vw;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1;
-        }
-        .header-buttons {
+            padding: 10px 20px;
             display: flex;
-            justify-content: center;
-            margin-top: 10px;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .header-button {
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            color: #ffffff;
+        }
+        .logo img {
+            height: 30px;
+            margin-right: 10px;
+        }
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+        .nav-links a {
             color: #fff;
             text-decoration: none;
             padding: 8px 16px;
             border-radius: 4px;
-            margin: 0 5px;
             background-color: transparent;
             border: 1px solid #fff;
             transition: background-color 0.3s ease;
         }
-        .header-button:hover {
+        .nav-links a:hover {
             background-color: rgba(255, 255, 255, 0.2);
         }
         .content-wrapper {
-            padding-top: 100px; /* Adjust this value as needed */
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #7e57c2;
         }
     </style>
 </head>
 <body>
-    <div class="chat-header">
-        <h2>Chatbot Interface</h2>
-        <div class="header-buttons">
-            <a href="/about" class="header-button">About Us</a>
-            <a href="/" class="header-button">Ask Your Question</a>
-            <a href="https://www.sochara.org/" class="header-button" target="_blank">Donate</a>
+    <div class="header">
+        <div class="logo">
+            <img src="https://cdn.dribbble.com/userupload/11844878/file/original-e172e96140d89ad3a11c70da24b9c022.png?crop=0x211-1080x1021&resize=400x300&vertical=center" alt="CHAT AI Logo">
+            CHAT AI
+        </div>
+        <div class="nav-links">
+            <a href="/">Ask your question</a>
+            <a href="/about">About us</a>
+            <a href="https://www.sochara.org/" target="_blank">Donate</a>
         </div>
     </div>
-
+    
     <div class="content-wrapper">
         <h1>About Our NGO</h1>
-        <p>Welcome to our NGO! We are a non-profit organization dedicated to making a positive impact in our community.</p>
-        <p>Our mission is to provide support and resources to those in need, focusing on areas such as education, healthcare, and environmental conservation.</p>
-        <!-- Add more information about your NGO here -->
+        <p>(SOCHARA) is an independent non-government organisation registered under Karnataka Societies Registration Act 17A (1960).</p>
+        <p>Our mission at SOCHARA is to promote community health awareness through education and outreach programs, conduct innovative research to address pressing public health challenges, and implement action-oriented initiatives that directly benefit community health. We aim to empower communities to take charge of their own health and well-being, advocate for health policies that prioritize community needs and equity, foster collaborations between health professionals, researchers, and community members, and develop sustainable approaches to improve health outcomes in diverse populations. Through these efforts, we strive to create a world where every community has the knowledge, resources, and support to achieve optimal health and well-being.</p>
+        <p>Through our AI-powered chatbot, we aim to:</p>
+        <ul>
+            <li>Provide instant access to accurate health information</li>
+            <li>Empower individuals with knowledge</li>
+            <li>Promote ethical values and moral education in a contemporary context</li>
+            <li>Connect users to appropriate health resources</li>
+        </ul>
+        <p>We believe that the teachings of Sochara are as relevant today as they were when they were first written, and we're committed to sharing this valuable knowledge with the world.</p>
     </div>
 </body>
 </html>
