@@ -43,7 +43,7 @@ def timeit(func):
         return result
     return wrapper_timeit
 
-@timeit
+
 def initialize_clickhouse_connection():
     return Client(host=os.getenv('CLICKHOUSE_HOST'),
                   port=int(os.getenv('CLICKHOUSE_PORT')),
@@ -51,7 +51,7 @@ def initialize_clickhouse_connection():
                   password=os.getenv('CLICKHOUSE_PASSWORD'),
                   database=os.getenv('CLICKHOUSE_DATABASE'))
 
-@timeit
+
 @functools.lru_cache(maxsize=None)
 def get_tokenizer_and_model():
     tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
@@ -61,7 +61,6 @@ def get_tokenizer_and_model():
     return tokenizer, model
 
 
-@timeit
 def generate_embeddings(tokenizer, model, query):
     try:
         inputs = tokenizer(query, return_tensors="pt", padding=True, truncation=True)
@@ -75,23 +74,21 @@ def generate_embeddings(tokenizer, model, query):
         logger.error(f"Error generating embeddings: {e}")
         return None
 
-@timeit
+
 def extract_important_words(query_text):
     words = re.findall(r'\b\w+\b', query_text.lower())
     important_words = [word for word in words if word not in stop_words]
     return important_words
 
-@timeit
+
 def get_surrounding_chunks_batch(client, chunk_ids, summary_ids, window_size=2):
-    # Ensure chunk_ids and summary_ids are lists
     chunk_ids = [chunk_ids] if not isinstance(chunk_ids, (list, tuple)) else chunk_ids
     summary_ids = [summary_ids] if not isinstance(summary_ids, (list, tuple)) else summary_ids
 
-    # Convert UUIDs and integers to strings
+    
     chunk_ids = [str(id) for id in chunk_ids]
     summary_ids = [str(id) for id in summary_ids]
 
-    # Ensure we have at least one item in each tuple for the IN clause
     chunk_ids_tuple = tuple(chunk_ids) if len(chunk_ids) > 1 else f"('{chunk_ids[0]}')"
     summary_ids_tuple = tuple(summary_ids) if len(summary_ids) > 1 else f"('{summary_ids[0]}')"
 
@@ -111,7 +108,7 @@ def get_surrounding_chunks_batch(client, chunk_ids, summary_ids, window_size=2):
         chunks[summary_id].append(chunk_text)
     return {str(summary_id): ' '.join(texts) for summary_id, texts in chunks.items()}
 
-@timeit
+
 @lru_cache(maxsize=1000)
 def get_original_filename(client, summary_id):
     try:
@@ -132,7 +129,6 @@ def get_original_filename(client, summary_id):
         return None
 
 
-@timeit
 def ann_search(client, query_embedding, window_size=2, top_n=1):
     try:
         question_embedding_str = ','.join(map(str, query_embedding))
@@ -172,7 +168,6 @@ def ann_search(client, query_embedding, window_size=2, top_n=1):
         return None, None
     
 
-@timeit
 def query_clickhouse_word_with_multi_stage(client, important_words, query_embedding, top_n=1):
     query_embedding_str = ','.join(map(str, query_embedding))
 
@@ -223,7 +218,7 @@ def query_clickhouse_word_with_multi_stage(client, important_words, query_embedd
     # Fallback to ANN search if no relevant chunks found
     return ann_search(client, query_embedding, top_n=top_n)
 
-@timeit
+
 @lru_cache(maxsize=1000)
 def get_pdf_description(client, filename):
     try:
@@ -263,7 +258,6 @@ def get_pdf_description(client, filename):
         return "Error retrieving description."
     
 
-@timeit
 def get_random_filename(client):
     try:
         query = "SELECT original_filename FROM abc_table ORDER BY rand() LIMIT 1"
@@ -281,7 +275,7 @@ def get_random_filename(client):
         print("An error occurred while fetching a random filename:", e)
         return None
 
-@timeit
+
 def deduplicate_results(client, closest_chunks, top_n=5):
     if not closest_chunks:
         return ["No content available"] * top_n, ["No file available"] * top_n
@@ -309,7 +303,7 @@ def deduplicate_results(client, closest_chunks, top_n=5):
     return full_contexts[:top_n], pdf_filenames[:top_n]
 
 
-@timeit
+
 def structure_sentence_with_llama(query, chunk_text, llama_tokenizer, llama_model):
     try:
         input_prompt = f"Question: {query}\nAnswer: {chunk_text}"
@@ -321,7 +315,7 @@ def structure_sentence_with_llama(query, chunk_text, llama_tokenizer, llama_mode
         print(f"An error occurred: {e}")
         return None
 
-@timeit    
+   
 def get_structured_answer(query, chunk_text):
     try:
         messages = [
@@ -343,8 +337,7 @@ def get_structured_answer(query, chunk_text):
         logger.error(f"Error in get_structured_answer: {str(e)}")
         return "I'm sorry, There seems to be no relevant answer for your question."
 
-# Add debug prints and exception handling
-@timeit
+
 def process_query_clickhouse_pdf(query_text, top_n=5):
     try:
         tokenizer, model = get_tokenizer_and_model()
