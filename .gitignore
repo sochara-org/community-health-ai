@@ -1,3 +1,5 @@
+config/
+files/
 venv/
 __pycache__
 

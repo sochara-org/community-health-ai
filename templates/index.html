@@ -255,10 +255,10 @@
                     <div class="file-scroll-container">
                         {% for pdf_url, pdf_description in zip(entry[2], entry[3]) %}
                             <a href="{{ pdf_url }}" target="_blank" class="file-button">
-                                <div class="filename">{{ pdf_url.split('/')[-1] }}</div>
                                 {% if pdf_description %}
-                                    <div class="description">{{ pdf_description }}</div>
+                                    <div class="filename">{{ pdf_description }}</div>
                                 {% endif %}
+                                <div class="description">{{ pdf_url.split('/')[-1] }}</div>
                             </a>        
                         {% endfor %}
                     </div>
@@ -347,15 +347,17 @@
 
                                 var fileName = document.createElement("div");
                                 fileName.className = "filename";
-                                fileName.textContent = pdf_url.split('/').pop();
+                                if (response.pdf_descriptions && response.pdf_descriptions[index]) {
+                                   fileName.textContent = response.pdf_descriptions[index];
+                                }
                                 fileButton.appendChild(fileName);
 
-                                if (response.pdf_descriptions && response.pdf_descriptions[index]) {
-                                    var description = document.createElement("div");
-                                    description.className = "description";
-                                    description.textContent = response.pdf_descriptions[index];
-                                    fileButton.appendChild(description);
-                                }
+                                
+                                var description = document.createElement("div");
+                                description.className = "description";
+                                description.textContent = pdf_url.split('/').pop();
+                                fileButton.appendChild(description);
+                                
 
                                 fileScrollContainer.appendChild(fileButton);
                             });
